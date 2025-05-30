@@ -1,0 +1,4 @@
+pyperclip
+duckduckgo_search
+gtts
+beautifulsoup4
