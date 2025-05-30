@@ -2,3 +2,6 @@ pyperclip
 duckduckgo_search
 gtts
 beautifulsoup4
+pyperclip
+pydub
+
