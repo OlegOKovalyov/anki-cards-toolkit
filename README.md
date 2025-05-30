@@ -20,3 +20,11 @@ cd anki-cards-toolkit
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+## Running
+
+```bash
+source venv/bin/activate
+python generate_card.py
+```
