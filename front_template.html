@@ -4,9 +4,18 @@
   {{Word}}
 </div>
 
-{{#Word_Audio}}
-<p>{{Word_Audio}}</p>
-{{/Word_Audio}}
+<div class="audio-section">
+  {{#Word_Audio}}
+  <div class="audio-element">{{Word_Audio}}</div>
+  {{/Word_Audio}}
+  
+  <!-- Adding a silent audio file to create a pause -->
+  [sound:silence_1sec.mp3]
+  
+  {{#Sentence_Audio}}
+  <div class="audio-element">{{Sentence_Audio}}</div>
+  {{/Sentence_Audio}}
+</div>
 
 <p><span style="font-size: small;">Definition:</span> {{Definition}}</p>
 
@@ -14,6 +23,11 @@
 <span style="font-weight: bold;">{{Sentence}}</span>
 </p>
 
-{{#Sentence_Audio}}
-<p>{{Sentence_Audio}}</p>
-{{/Sentence_Audio}}
+<style>
+.audio-section {
+    margin: 10px 0;
+}
+.audio-element {
+    margin: 5px 0;
+}
+</style>

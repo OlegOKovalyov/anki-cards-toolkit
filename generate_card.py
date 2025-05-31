@@ -127,12 +127,22 @@ def generate_tts_base64(text):
         buffer.seek(0)
         encoded = base64.b64encode(buffer.read()).decode('utf-8')
         return f"[sound:tts_{word}.mp3]", encoded
+    except requests.exceptions.ConnectionError:
+        print("\n❌ Помилка: Не вдалося підключитися до сервісу TTS. Перевірте підключення до інтернету.")
+        return None, None
     except Exception as e:
-        print(f"❌ Помилка при генерації TTS: {e}")
-        return "", ""
+        print(f"\n❌ Помилка при генерації TTS: {str(e)}")
+        return None, None
 
 word_audio_ref, word_audio_data = generate_tts_base64(word)
+if word_audio_ref is None or word_audio_data is None:
+    print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
+    exit(0)
+
 sentence_audio_ref, sentence_audio_data = generate_tts_base64(sentence)
+if sentence_audio_ref is None or sentence_audio_data is None:
+    print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
+    exit(0)
 
 # == Додавання мультимедійних файлів до Anki ==
 def send_media_file(name, b64_data):
