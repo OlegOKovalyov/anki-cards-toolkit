@@ -122,10 +122,17 @@ def fetch_images(word, num_images=6):
         "Authorization": PEXELS_API_KEY
     }
     try:
-        response = requests.get(url)
+        print(f"\n🔍 Sending request to Pexels API...")
+        response = requests.get(url, headers=headers)  # Added headers parameter
+        print(f"📡 Status code: {response.status_code}")
+        
+        if response.status_code != 200:
+            print(f"❌ API Error: {response.text}")
+            return []
+            
         data = response.json()
         if data.get("photos"):
-            return [
+            images = [
                 {
                     "url": photo["src"]["medium"],
                     "photographer": photo["photographer"],
@@ -133,9 +140,14 @@ def fetch_images(word, num_images=6):
                 }
                 for photo in data["photos"]
             ]
+            print(f"✅ Found {len(images)} images")
+            return images
+            
+        print("❌ No photos found in API response")
+        print(f"📝 API Response: {data}")
         return []
     except Exception as e:
-        print(f"❌ Error fetching images: {e}")
+        print(f"❌ Error fetching images: {str(e)}")
         return []
 
 def select_image(images, word):
