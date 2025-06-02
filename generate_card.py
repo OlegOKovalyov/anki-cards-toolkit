@@ -8,10 +8,162 @@ import base64
 from io import BytesIO
 import requests
 from bs4 import BeautifulSoup
+import termios
+import tty
+import os
+import sys
+import webbrowser
+import tempfile
+import html
 
 # == Налаштування ==
 MODEL_NAME = "VocabCard_English_UA"
 DECK_NAME = "Default"
+PEXELS_API_KEY = 'R6T2MCrfCrNxu5SrXkO2OSapt8kJTwl4GYTFmEnSHQturYOKztFJAqXU'
+
+def get_char():
+    """Get a single character from standard input"""
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
+def create_image_gallery(images, word):
+    """Create a temporary HTML file with image gallery"""
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Вибір зображення для '{word}'</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                background: #f5f5f5;
+            }}
+            .gallery {{
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-top: 20px;
+            }}
+            .image-container {{
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }}
+            .image-container img {{
+                width: 100%;
+                height: 250px;
+                object-fit: cover;
+                border-radius: 4px;
+            }}
+            .image-info {{
+                margin-top: 10px;
+                font-size: 14px;
+                color: #666;
+            }}
+            h1 {{
+                color: #333;
+                text-align: center;
+            }}
+            .instructions {{
+                text-align: center;
+                margin: 20px 0;
+                padding: 15px;
+                background: #e9ecef;
+                border-radius: 8px;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Вибір зображення для '{word}'</h1>
+        <div class="instructions">
+            <p>👀 Перегляньте зображення нижче та запам'ятайте номер (1-6) бажаного зображення.</p>
+            <p>Поверніться до терміналу для вибору.</p>
+        </div>
+        <div class="gallery">
+    """
+    
+    for i, image in enumerate(images, 1):
+        html_content += f"""
+            <div class="image-container">
+                <img src="{html.escape(image['url'])}" alt="Варіант {i}">
+                <div class="image-info">
+                    <strong>Зображення {i}</strong><br>
+                    Автор: {html.escape(image['photographer'])}<br>
+                    <a href="{html.escape(image['pexels_url'])}" target="_blank">Переглянути на Pexels</a>
+                </div>
+            </div>
+        """
+    
+    html_content += """
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Create temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
+        f.write(html_content)
+        return f.name
+
+def fetch_images(word, num_images=6):
+    """Fetch multiple images from Pexels"""
+    url = f"https://api.pexels.com/v1/search?query={word}&per_page={num_images}"
+    headers = {
+        "Authorization": PEXELS_API_KEY
+    }
+    try:
+        response = requests.get(url)
+        data = response.json()
+        if data.get("photos"):
+            return [
+                {
+                    "url": photo["src"]["medium"],
+                    "photographer": photo["photographer"],
+                    "pexels_url": photo["url"]
+                }
+                for photo in data["photos"]
+            ]
+        return []
+    except Exception as e:
+        print(f"❌ Error fetching images: {e}")
+        return []
+
+def select_image(images, word):
+    """Interactive image selection interface with visual preview"""
+    if not images:
+        print("Зображень не знайдено.")
+        return None
+    
+    # Create and open gallery
+    gallery_path = create_image_gallery(images, word)
+    webbrowser.open('file://' + os.path.abspath(gallery_path))
+    
+    while True:
+        try:
+            choice = input("\n🔢 Введіть номер зображення (1-6) або натисніть Enter для пропуску: ").strip()
+            
+            if not choice:  # Skip image selection
+                os.unlink(gallery_path)
+                return None
+                
+            choice = int(choice)
+            if 1 <= choice <= len(images):
+                os.unlink(gallery_path)
+                return images[choice - 1]['url']
+            else:
+                print(f"❌ Будь ласка, введіть число від 1 до {len(images)}")
+        except ValueError:
+            print("❌ Будь ласка, введіть правильне число")
 
 def detect_pos_from_context(word, sentence):
     """Simple rule-based POS detection"""
@@ -99,8 +251,27 @@ def fetch_dictionary_data(word, requested_pos=None):
         return None
 
 # == Зчитуємо речення з буфера ==
-sentence = re.sub(r'\s+', ' ', pyperclip.paste().replace('\n', ' ')).strip()
+# sentence = re.sub(r'\s+', ' ', pyperclip.paste().replace('\n', ' ')).strip()
+# print(f"\n📋 Скопійоване речення:\n{sentence}\n")
+
+# == Зчитуємо речення з буфера і очищуємо ==
+raw_text = pyperclip.paste()
+
+# Обробка:
+# 1. Видаляємо перенесення з дефісом (generos-\nity → generosity)
+# 2. Прибираємо всі переноси рядків (залишки)
+# 3. Прибираємо зайві пробіли перед розділовими знаками
+# 4. Заміна декількох пробілів на один
+import re
+sentence = raw_text
+sentence = re.sub(r'-\s*\n\s*', '', sentence)       # перенос із дефісом
+sentence = re.sub(r'\s*\n\s*', ' ', sentence)        # звичайні переноси
+sentence = re.sub(r'\s+([.,:;!?])', r'\1', sentence) # пробіл перед пунктуацією
+sentence = re.sub(r'\s{2,}', ' ', sentence)          # подвійні пробіли
+sentence = sentence.strip()
+
 print(f"\n📋 Скопійоване речення:\n{sentence}\n")
+
 
 # == Запит слова ==
 word = input("🔤 Введи слово, яке хочеш вивчати: ").strip().lower()
@@ -125,59 +296,19 @@ highlighted = re.sub(
     flags=re.IGNORECASE
 )
 
-# == Пошук зображення через DuckDuckGo ==
-# def get_image_url(query):
-#    try:
-#        with DDGS() as ddgs:
-#            results = ddgs.images(query)
-#            for r in results:
-#                return r["image"]
-#    except Exception as e:
-#        print(f"❌ Не вдалося знайти зображення: {e}")
-#        return ""
-
-'''
-def get_image_url(word):
-    """
-    Повертає посилання на перше релевантне зображення зі словом.
-    Джерело: Google Images через DuckDuckGo (без API)
-    """
-    search_url = f"https://duckduckgo.com/?q={word}+english+definition&iax=images&ia=images"
-    headers = {'User-Agent': 'Mozilla/5.0'}
-
-    try:
-        response = requests.get(search_url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        img_tags = soup.find_all('img')
-
-        # Пошук першого валідного зображення
-        for img in img_tags:
-            src = img.get('src')
-            if src and src.startswith("http"):
-                return src
-
-        return None  # Якщо не знайдено
-
-    except Exception as e:
-        print(f"[Error] Failed to fetch image for '{word}':", e)
-        return None
-'''        
-
-PEXELS_API_KEY = 'R6T2MCrfCrNxu5SrXkO2OSapt8kJTwl4GYTFmEnSHQturYOKztFJAqXU'
-
-def get_image_url(word):
-    url = f"https://api.pexels.com/v1/search?query={word}&per_page=1"
-    headers = {
-        "Authorization": PEXELS_API_KEY
-    }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    if data["photos"]:
-        return data["photos"][0]["src"]["medium"]
+# == Image Selection ==
+print("\n🔍 Пошук відповідних зображень...")
+images = fetch_images(word)
+if images:
+    print(f"Знайдено {len(images)} зображень. Відкриваю попередній перегляд у браузері...")
+    image_url = select_image(images, word)
+    if image_url:
+        print("✅ Зображення успішно вибрано.")
     else:
-        return ""                
-
-image_url = get_image_url(word)
+        print("⚠️ Зображення не вибрано. Продовжую без зображення.")
+else:
+    print("⚠️ Зображень не знайдено. Продовжую без зображення.")
+    image_url = ""
 
 # == Генерація озвучки (mp3 в base64) ==
 def generate_tts_base64(text):
