@@ -13,6 +13,91 @@ from bs4 import BeautifulSoup
 MODEL_NAME = "VocabCard_English_UA"
 DECK_NAME = "Default"
 
+def detect_pos_from_context(word, sentence):
+    """Simple rule-based POS detection"""
+    word = word.lower()
+    sentence = sentence.lower()
+    
+    # Find the word and its surrounding context
+    word_pattern = re.compile(r'\b' + re.escape(word) + r'\w*\b')
+    match = word_pattern.search(sentence)
+    if not match:
+        return None
+        
+    words = sentence.split()
+    word_index = None
+    for i, w in enumerate(words):
+        if word in w:
+            word_index = i
+            break
+            
+    if word_index is None:
+        return None
+        
+    # Simple rules for POS detection
+    # Check for adjective
+    if word.endswith(('able', 'ible', 'al', 'ful', 'ic', 'ive', 'less', 'ous')):
+        return "adjective"
+    
+    # Check for adverb
+    if word.endswith('ly'):
+        return "adverb"
+    
+    # Check for verb
+    if word_index > 0:
+        prev_word = words[word_index - 1]
+        if prev_word in ['to', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can']:
+            return "verb"
+    
+    # Check for common verb endings
+    if word.endswith(('ate', 'ize', 'ise', 'ify')):
+        return "verb"
+    
+    # Default to noun if no other patterns match
+    return "noun"
+
+def fetch_dictionary_data(word, requested_pos=None):
+    """Fetch word data from dictionary API with optional POS filtering"""
+    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(f"❌ Помилка: слово '{word}' не знайдено у словнику.")
+            return None
+            
+        data = response.json()[0]
+        meanings = data.get("meanings", [])
+        
+        # If POS is specified, try to find matching definition
+        if requested_pos:
+            matching_meanings = [m for m in meanings if m.get("partOfSpeech") == requested_pos]
+            if matching_meanings:
+                meaning = matching_meanings[0]
+            else:
+                meaning = meanings[0] if meanings else None
+                if meaning:
+                    print(f"⚠️ Використовую визначення для частини мови: {meaning.get('partOfSpeech')}")
+        else:
+            meaning = meanings[0] if meanings else None
+            
+        if not meaning:
+            return None
+            
+        definitions = meaning.get("definitions", [])
+        if not definitions:
+            return None
+            
+        return {
+            "definition": definitions[0].get("definition", ""),
+            "example": definitions[0].get("example", ""),
+            "synonyms": ", ".join(definitions[0].get("synonyms", [])[:5]),
+            "partOfSpeech": meaning.get("partOfSpeech", "")
+        }
+        
+    except Exception as e:
+        print(f"❌ Виняток: {e}")
+        return None
+
 # == Зчитуємо речення з буфера ==
 sentence = re.sub(r'\s+', ' ', pyperclip.paste().replace('\n', ' ')).strip()
 print(f"\n📋 Скопійоване речення:\n{sentence}\n")
@@ -20,38 +105,14 @@ print(f"\n📋 Скопійоване речення:\n{sentence}\n")
 # == Запит слова ==
 word = input("🔤 Введи слово, яке хочеш вивчати: ").strip().lower()
 
-# == Отримати визначення, приклад, синоніми ==
-def fetch_dictionary_data(word):
-    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
-    try:
-        response = requests.get(url)
-        if response.status_code != 200:
-            print(f"❌ Помилка: слово '{word}' не знайдено у словнику.")
-            return None
-        data = response.json()[0]
-        meanings = data.get("meanings", [])
-        definition = ""
-        example = ""
-        synonyms = []
+# Detect part of speech and show it in the prompt
+detected_pos = detect_pos_from_context(word, sentence) or "noun"
+pos = input(f"📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: ").strip().lower()
+if not pos:
+    pos = detected_pos
 
-        for meaning in meanings:
-            defs = meaning.get("definitions", [])
-            if defs:
-                definition = defs[0].get("definition", "")
-                example = defs[0].get("example", "")
-                synonyms = defs[0].get("synonyms", [])
-                break
-
-        return {
-            "definition": definition,
-            "example": example,
-            "synonyms": ", ".join(synonyms[:5]) if synonyms else ""
-        }
-    except Exception as e:
-        print(f"❌ Виняток: {e}")
-        return None
-
-data = fetch_dictionary_data(word)
+# Get dictionary data with POS
+data = fetch_dictionary_data(word, pos)
 if not data:
     exit(1)
 
