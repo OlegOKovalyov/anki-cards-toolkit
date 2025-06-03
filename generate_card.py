@@ -20,6 +20,7 @@ import html
 MODEL_NAME = "VocabCard_English_UA"
 DECK_NAME = "Default"
 PEXELS_API_KEY = 'R6T2MCrfCrNxu5SrXkO2OSapt8kJTwl4GYTFmEnSHQturYOKztFJAqXU'
+BIG_HUGE_API_KEY = '7d4ebb0df20e98dde8f3604e6759ab01'  # Big Huge Thesaurus API key
 
 def get_char():
     """Get a single character from standard input"""
@@ -220,8 +221,66 @@ def detect_pos_from_context(word, sentence):
     # Default to noun if no other patterns match
     return "noun"
 
+def fetch_thesaurus_data(word, pos=None):
+    """
+    Fetch synonyms and antonyms from Big Huge Thesaurus for specific part of speech.
+    Returns only the synonyms and antonyms that match the requested part of speech.
+    """
+    url = f"https://words.bighugelabs.com/api/2/{BIG_HUGE_API_KEY}/{word}/json"
+    
+    # Map our POS to Big Huge Thesaurus format
+    pos_mapping = {
+        "noun": "noun",
+        "verb": "verb",
+        "adjective": "adjective",
+        "adverb": "adverb"
+    }
+    
+    try:
+        print(f"\n🔍 Запит до Big Huge Thesaurus для слова '{word}'...")
+        response = requests.get(url)
+        
+        if response.status_code != 200:
+            print(f"⚠️ Thesaurus: Не вдалося отримати синоніми/антоніми для '{word}'")
+            print(f"📡 Код відповіді: {response.status_code}")
+            return None, None
+            
+        data = response.json()
+        print("✅ Отримано відповідь від Big Huge Thesaurus")
+        
+        # Debug: print available parts of speech in response
+        print(f"📚 Доступні частини мови: {', '.join(data.keys())}")
+        
+        # If POS is specified, only look in that section
+        if pos and pos in pos_mapping:
+            mapped_pos = pos_mapping[pos]
+            pos_data = data.get(mapped_pos, {})
+            
+            if not pos_data:
+                print(f"⚠️ Частина мови '{pos}' не знайдена у відповіді")
+                return None, None
+                
+            synonyms = pos_data.get('syn', [])
+            antonyms = pos_data.get('ant', [])
+            
+            print(f"📖 Знайдено для '{pos}':")
+            print(f"   Синоніми: {synonyms[:5]}")  # Show first 5 for debugging
+            print(f"   Антоніми: {antonyms[:5]}")  # Show first 5 for debugging
+            
+            return synonyms, antonyms
+            
+        return None, None
+        
+    except Exception as e:
+        print(f"❌ Помилка Thesaurus API: {str(e)}")
+        return None, None
+
 def fetch_dictionary_data(word, requested_pos=None):
-    """Fetch word data from dictionary API with optional POS filtering"""
+    """
+    Fetch word data from dictionary API with optional POS filtering.
+    When POS is specified, returns only definitions, synonyms, and antonyms
+    from that specific part of speech.
+    """
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     try:
         response = requests.get(url)
@@ -232,15 +291,14 @@ def fetch_dictionary_data(word, requested_pos=None):
         data = response.json()[0]
         meanings = data.get("meanings", [])
         
-        # If POS is specified, try to find matching definition
+        # If POS is specified, strictly filter by that part of speech
         if requested_pos:
             matching_meanings = [m for m in meanings if m.get("partOfSpeech") == requested_pos]
             if matching_meanings:
                 meaning = matching_meanings[0]
             else:
-                meaning = meanings[0] if meanings else None
-                if meaning:
-                    print(f"⚠️ Використовую визначення для частини мови: {meaning.get('partOfSpeech')}")
+                print(f"⚠️ Визначення для частини мови '{requested_pos}' не знайдено.")
+                return None
         else:
             meaning = meanings[0] if meanings else None
             
@@ -251,15 +309,63 @@ def fetch_dictionary_data(word, requested_pos=None):
         if not definitions:
             return None
             
+        # Initialize lists to preserve order
+        dict_synonyms = []
+        dict_antonyms = []
+        
+        # Collect synonyms and antonyms only from the matching part of speech
+        for definition in definitions:
+            # Add new synonyms while preserving order and avoiding duplicates
+            for syn in definition.get("synonyms", []):
+                if syn not in dict_synonyms:
+                    dict_synonyms.append(syn)
+            
+            # Add new antonyms while preserving order and avoiding duplicates
+            for ant in definition.get("antonyms", []):
+                if ant not in dict_antonyms:
+                    dict_antonyms.append(ant)
+        
+        print("\n📖 Синоніми/антоніми з Dictionary API:")
+        print(f"   Синоніми: {dict_synonyms[:5]}")  # Show first 5 for debugging
+        print(f"   Антоніми: {dict_antonyms[:5]}")  # Show first 5 for debugging
+        
+        # Get additional synonyms/antonyms from thesaurus
+        thes_synonyms, thes_antonyms = fetch_thesaurus_data(word, requested_pos)
+        
+        # Add thesaurus synonyms while preserving order
+        if thes_synonyms:
+            for syn in thes_synonyms:
+                if syn not in dict_synonyms:
+                    dict_synonyms.append(syn)
+        
+        # Add thesaurus antonyms while preserving order
+        if thes_antonyms:
+            for ant in thes_antonyms:
+                if ant not in dict_antonyms:
+                    dict_antonyms.append(ant)
+        
+        print("\n📝 Фінальний результат:")
+        print(f"   Синоніми ({len(dict_synonyms)}): {dict_synonyms[:7]}")
+        print(f"   Антоніми ({len(dict_antonyms)}): {dict_antonyms[:7]}")
+        
+        # Limit entries while preserving order
+        dict_synonyms = dict_synonyms[:7]
+        dict_antonyms = dict_antonyms[:7]
+        
+        # Format results maintaining original order
+        synonyms_text = ", ".join(dict_synonyms) if dict_synonyms else "No synonyms found"
+        antonyms_text = ", ".join(dict_antonyms) if dict_antonyms else "No antonyms found"
+            
         return {
             "definition": definitions[0].get("definition", ""),
             "example": definitions[0].get("example", ""),
-            "synonyms": ", ".join(definitions[0].get("synonyms", [])[:5]),
+            "synonyms": synonyms_text,
+            "antonyms": antonyms_text,
             "partOfSpeech": meaning.get("partOfSpeech", "")
         }
         
     except Exception as e:
-        print(f"❌ Виняток: {e}")
+        print(f"❌ Виняток при отриманні даних зі словника: {e}")
         return None
 
 # == Зчитуємо речення з буфера ==
@@ -349,57 +455,106 @@ if sentence_audio_ref is None or sentence_audio_data is None:
     exit(0)
 
 # == Додавання мультимедійних файлів до Anki ==
+def check_anki_connect():
+    """Check if AnkiConnect is available"""
+    try:
+        response = requests.get("http://localhost:8765")
+        return True
+    except requests.exceptions.ConnectionError:
+        print("\n❌ Помилка: Не вдалося підключитися до Anki.")
+        print("📝 Переконайтеся, що:")
+        print("   1. Anki запущено")
+        print("   2. Встановлено додаток AnkiConnect")
+        print("   3. AnkiConnect налаштовано на порт 8765")
+        return False
+
 def send_media_file(name, b64_data):
-    result = requests.post("http://localhost:8765", json={
-        "action": "storeMediaFile",
-        "version": 6,
-        "params": {
-            "filename": name,
-            "data": b64_data
-        }
-    }).json()
-    if result.get("error"):
-        print(f"❌ Помилка додавання {name}: {result['error']}")
-    else:
-        print(f"📁 Файл {name} збережено")
+    """Send media file to Anki with error handling"""
+    try:
+        result = requests.post("http://localhost:8765", json={
+            "action": "storeMediaFile",
+            "version": 6,
+            "params": {
+                "filename": name,
+                "data": b64_data
+            }
+        }, timeout=5).json()
+        
+        if result.get("error"):
+            print(f"⚠️ Помилка додавання {name}: {result['error']}")
+            return False
+        else:
+            print(f"📁 Файл {name} збережено")
+            return True
+            
+    except requests.exceptions.ConnectionError:
+        print(f"⚠️ Не вдалося зберегти {name}: немає зʼєднання з Anki")
+        return False
+    except Exception as e:
+        print(f"⚠️ Помилка при збереженні {name}: {str(e)}")
+        return False
+
+# Before sending files to Anki, check connection
+anki_available = check_anki_connect()
 
 if word_audio_data:
-    send_media_file(f"tts_{word}.mp3", word_audio_data)
+    if anki_available:
+        send_media_file(f"tts_{word}.mp3", word_audio_data)
+    else:
+        print("⚠️ Аудіо файл не буде збережено через відсутність зʼєднання з Anki")
+
 if sentence_audio_data:
-    send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
+    if anki_available:
+        send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
+    else:
+        print("⚠️ Аудіо файл речення не буде збережено через відсутність зʼєднання з Anki")
 
 # == Формування картки ==
-note = {
-    "deckName": DECK_NAME,
-    "modelName": MODEL_NAME,
-    "fields": {
-        "Word": word,
-        "Front": "",
-        "Back": "",
-        "Image": f'<img src="{image_url}">' if image_url else "",
-        "Definition": data["definition"],
-        "Sentence": highlighted,
-        "Sentence_Repeated": sentence,
-        "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
-        "Word_Audio": word_audio_ref,
-        "Dictionary_Entry": "",
-        "Translation_UA": "",
-        "Tags": ""
-    },
-    "options": {
-        "allowDuplicate": False
-    },
-    "tags": []
-}
+if anki_available:
+    note = {
+        "deckName": DECK_NAME,
+        "modelName": MODEL_NAME,
+        "fields": {
+            "Word": word,
+            "Front": "",
+            "Back": "",
+            "Image": f'<img src="{image_url}">' if image_url else "",
+            "Definition": data["definition"],
+            "Synonyms": data["synonyms"],
+            "Antonyms": data["antonyms"],
+            "Sentence": highlighted,
+            "Sentence_Repeated": sentence,
+            "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
+            "Word_Audio": word_audio_ref,
+            "Dictionary_Entry": "",
+            "Translation_UA": "",
+            "Tags": ""
+        },
+        "options": {
+            "allowDuplicate": False
+        },
+        "tags": []
+    }
 
-# == Надсилання до AnkiConnect ==
-result = requests.post("http://localhost:8765", json={
-    "action": "addNote",
-    "version": 6,
-    "params": {"note": note}
-}).json()
+    try:
+        result = requests.post("http://localhost:8765", json={
+            "action": "addNote",
+            "version": 6,
+            "params": {"note": note}
+        }, timeout=5).json()
 
-if result.get("error") is None:
-    print(f"✅ Картку додано: ID = {result['result']}")
+        if result.get("error") is None:
+            print(f"✅ Картку додано: ID = {result['result']}")
+        else:
+            print(f"❌ Помилка додавання картки: {result['error']}")
+            
+    except requests.exceptions.ConnectionError:
+        print("❌ Не вдалося додати картку: немає зʼєднання з Anki")
+    except Exception as e:
+        print(f"❌ Помилка при додаванні картки: {str(e)}")
 else:
-    print(f"❌ Помилка: {result['error']}")
+    print("\n⚠️ Картку не було додано через відсутність зʼєднання з Anki")
+    print("💡 Щоб додати картку пізніше:")
+    print(f"   1. Запустіть Anki")
+    print(f"   2. Переконайтеся, що встановлено AnkiConnect")
+    print(f"   3. Запустіть скрипт знову")
