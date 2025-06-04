@@ -223,8 +223,8 @@ def detect_pos_from_context(word, sentence):
 
 def fetch_thesaurus_data(word, pos=None):
     """
-    Fetch synonyms and antonyms from Big Huge Thesaurus for specific part of speech.
-    Returns only the synonyms and antonyms that match the requested part of speech.
+    Fetch all lexical relationships from Big Huge Thesaurus for specific part of speech.
+    Returns a dictionary containing synonyms, antonyms, related words, and similar words.
     """
     url = f"https://words.bighugelabs.com/api/2/{BIG_HUGE_API_KEY}/{word}/json"
     
@@ -241,9 +241,14 @@ def fetch_thesaurus_data(word, pos=None):
         response = requests.get(url)
         
         if response.status_code != 200:
-            print(f"⚠️ Thesaurus: Не вдалося отримати синоніми/антоніми для '{word}'")
+            print(f"⚠️ Thesaurus: Не вдалося отримати дані для '{word}'")
             print(f"📡 Код відповіді: {response.status_code}")
-            return None, None
+            return {
+                "synonyms": [],
+                "antonyms": [],
+                "related": [],
+                "similar": []
+            }
             
         data = response.json()
         print("✅ Отримано відповідь від Big Huge Thesaurus")
@@ -251,29 +256,60 @@ def fetch_thesaurus_data(word, pos=None):
         # Debug: print available parts of speech in response
         print(f"📚 Доступні частини мови: {', '.join(data.keys())}")
         
+        # Initialize result containers
+        all_synonyms = []
+        all_antonyms = []
+        all_related = []
+        all_similar = []
+        
         # If POS is specified, only look in that section
         if pos and pos in pos_mapping:
             mapped_pos = pos_mapping[pos]
             pos_data = data.get(mapped_pos, {})
             
-            if not pos_data:
-                print(f"⚠️ Частина мови '{pos}' не знайдена у відповіді")
-                return None, None
-                
-            synonyms = pos_data.get('syn', [])
-            antonyms = pos_data.get('ant', [])
-            
-            print(f"📖 Знайдено для '{pos}':")
-            print(f"   Синоніми: {synonyms[:5]}")  # Show first 5 for debugging
-            print(f"   Антоніми: {antonyms[:5]}")  # Show first 5 for debugging
-            
-            return synonyms, antonyms
-            
-        return None, None
+            if pos_data:
+                all_synonyms.extend(pos_data.get('syn', []))
+                all_antonyms.extend(pos_data.get('ant', []))
+                all_related.extend(pos_data.get('rel', []))
+                all_similar.extend(pos_data.get('sim', []))
+        else:
+            # If no POS specified or not found, gather from all parts of speech
+            for pos_section in data.values():
+                if isinstance(pos_section, dict):
+                    all_synonyms.extend(pos_section.get('syn', []))
+                    all_antonyms.extend(pos_section.get('ant', []))
+                    all_related.extend(pos_section.get('rel', []))
+                    all_similar.extend(pos_section.get('sim', []))
+        
+        # Remove duplicates while preserving order
+        def deduplicate(lst):
+            seen = set()
+            return [x for x in lst if not (x in seen or seen.add(x))]
+        
+        result = {
+            "synonyms": deduplicate(all_synonyms),
+            "antonyms": deduplicate(all_antonyms),
+            "related": deduplicate(all_related),
+            "similar": deduplicate(all_similar)
+        }
+        
+        # Debug output
+        print("\n📝 Знайдені зв'язки:")
+        for key, values in result.items():
+            if values:
+                print(f"   {key.capitalize()}: {len(values)} слів")
+                print(f"   Приклад: {', '.join(values[:5])}...")
+        
+        return result
         
     except Exception as e:
         print(f"❌ Помилка Thesaurus API: {str(e)}")
-        return None, None
+        return {
+            "synonyms": [],
+            "antonyms": [],
+            "related": [],
+            "similar": []
+        }
 
 def fetch_dictionary_data(word, requested_pos=None):
     """
@@ -309,58 +345,20 @@ def fetch_dictionary_data(word, requested_pos=None):
         if not definitions:
             return None
             
-        # Initialize lists to preserve order
-        dict_synonyms = []
-        dict_antonyms = []
+        # Get thesaurus data
+        thes_data = fetch_thesaurus_data(word, requested_pos)
         
-        # Collect synonyms and antonyms only from the matching part of speech
-        for definition in definitions:
-            # Add new synonyms while preserving order and avoiding duplicates
-            for syn in definition.get("synonyms", []):
-                if syn not in dict_synonyms:
-                    dict_synonyms.append(syn)
-            
-            # Add new antonyms while preserving order and avoiding duplicates
-            for ant in definition.get("antonyms", []):
-                if ant not in dict_antonyms:
-                    dict_antonyms.append(ant)
-        
-        print("\n📖 Синоніми/антоніми з Dictionary API:")
-        print(f"   Синоніми: {dict_synonyms[:5]}")  # Show first 5 for debugging
-        print(f"   Антоніми: {dict_antonyms[:5]}")  # Show first 5 for debugging
-        
-        # Get additional synonyms/antonyms from thesaurus
-        thes_synonyms, thes_antonyms = fetch_thesaurus_data(word, requested_pos)
-        
-        # Add thesaurus synonyms while preserving order
-        if thes_synonyms:
-            for syn in thes_synonyms:
-                if syn not in dict_synonyms:
-                    dict_synonyms.append(syn)
-        
-        # Add thesaurus antonyms while preserving order
-        if thes_antonyms:
-            for ant in thes_antonyms:
-                if ant not in dict_antonyms:
-                    dict_antonyms.append(ant)
-        
-        print("\n📝 Фінальний результат:")
-        print(f"   Синоніми ({len(dict_synonyms)}): {dict_synonyms[:7]}")
-        print(f"   Антоніми ({len(dict_antonyms)}): {dict_antonyms[:7]}")
-        
-        # Limit entries while preserving order
-        dict_synonyms = dict_synonyms[:7]
-        dict_antonyms = dict_antonyms[:7]
-        
-        # Format results maintaining original order
-        synonyms_text = ", ".join(dict_synonyms) if dict_synonyms else "No synonyms found"
-        antonyms_text = ", ".join(dict_antonyms) if dict_antonyms else "No antonyms found"
+        # Format results
+        def format_word_list(words):
+            return ", ".join(words) if words else "No words found"
             
         return {
             "definition": definitions[0].get("definition", ""),
             "example": definitions[0].get("example", ""),
-            "synonyms": synonyms_text,
-            "antonyms": antonyms_text,
+            "synonyms": format_word_list(thes_data["synonyms"]),
+            "antonyms": format_word_list(thes_data["antonyms"]),
+            "related": format_word_list(thes_data["related"]),
+            "similar": format_word_list(thes_data["similar"]),
             "partOfSpeech": meaning.get("partOfSpeech", "")
         }
         
@@ -522,6 +520,8 @@ if anki_available:
             "Definition": data["definition"],
             "Synonyms": data["synonyms"],
             "Antonyms": data["antonyms"],
+            "Related": data["related"],
+            "Similar": data["similar"],
             "Sentence": highlighted,
             "Sentence_Repeated": sentence,
             "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",

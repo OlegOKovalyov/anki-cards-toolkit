@@ -9,18 +9,31 @@
   <div class="audio-element">{{Word_Audio}}</div>
   {{/Word_Audio}}
   
-  <!-- Adding a silent audio file to create a pause -->
-  [sound:silence_1sec.mp3]
-  
-  {{#Sentence_Audio}}
-  <div class="audio-element">{{Sentence_Audio}}</div>
-  {{/Sentence_Audio}}
+	<div style="display: none;">
+  	<!-- Adding a silent audio file to create a pause -->
+  	[sound:silence_1sec.mp3]
+  </div>
 </div>
 
 <p><span style="font-size: small;">Definition:</span> {{Definition}}</p>
 
+<p>{{#Synonyms}}<div><p><span style="font-size: small;">Synonyms:</span> {{Synonyms}}</div>{{/Synonyms}}</p>
+
+<p>{{#Related}}<div><p><span style="font-size: small;">Related:</span> {{Related}}</div>{{/Related}}</p>
+
+<p>{{#Similar}}<div><p><span style="font-size: small;">Similar:</span> {{Similar}}</div>{{/Similar}}</p>
+
+<p>{{#Antonyms}}<div><p><span style="font-size: small;">Antonyms:</span> {{Antonyms}}</div>{{/Antonyms}}</p>
+
 <p><span style="font-size: small;">Sentence:</span><br>
-<span style="font-weight: bold;">{{Sentence}}</span>
+	<span style="font-weight: bold;">{{Sentence}}</span>
+
+	{{#Sentence_Audio}}
+  	<div class="audio-element">{{Sentence_Audio}}</div>
+	{{/Sentence_Audio}}
+</p>
+
+<p><div><span style="font-size: small;">Dictionary Entry:</span><br></div>
 </p>
 
 <style>
