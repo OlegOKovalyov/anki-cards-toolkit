@@ -2,7 +2,6 @@ pyperclip
 duckduckgo_search
 gtts
 beautifulsoup4
-pyperclip
 pydub
 requests>=2.25.1
 
