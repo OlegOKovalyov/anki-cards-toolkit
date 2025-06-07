@@ -15,12 +15,35 @@ import sys
 import webbrowser
 import tempfile
 import html
+import csv
 
 # == Налаштування ==
 MODEL_NAME = "VocabCard_English_UA"
 DECK_NAME = "Default"
 PEXELS_API_KEY = 'R6T2MCrfCrNxu5SrXkO2OSapt8kJTwl4GYTFmEnSHQturYOKztFJAqXU'
 BIG_HUGE_API_KEY = '7d4ebb0df20e98dde8f3604e6759ab01'  # Big Huge Thesaurus API key
+
+def load_cefr_frequency_data():
+    """Load CEFR and frequency data from CSV file"""
+    cefr_freq_data = {}
+    csv_path = os.path.join(os.path.dirname(__file__), 'data', 'merged_cefr_frequency.csv')
+    
+    try:
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                word = row['Word'].strip().lower()
+                cefr = row['CEFR'].strip().upper()
+                freq = row['Frequency'].strip()
+                cefr_freq_data[word] = {'cefr': cefr, 'frequency': freq}
+        print(f"✅ Loaded CEFR/frequency data for {len(cefr_freq_data)} words")
+        return cefr_freq_data
+    except Exception as e:
+        print(f"⚠️ Could not load CEFR/frequency data: {str(e)}")
+        return {}
+
+# Load CEFR and frequency data at startup
+CEFR_FREQUENCY_DATA = load_cefr_frequency_data()
 
 def get_char():
     """Get a single character from standard input"""
@@ -331,11 +354,24 @@ def format_dictionary_entry(data):
     align-items: center;
     gap: 15px;
     margin-bottom: 10px;
+    justify-content: space-between;
+    width: 100%;
+}
+.word-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 .word {
     font-size: 1.5em;
     color: #ffa94d;
     font-weight: 600;
+}
+.cefr-freq {
+    color: #868e96;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 .phonetic {
     color: #adb5bd;
@@ -387,16 +423,32 @@ def format_dictionary_entry(data):
         
         html.append('<div class="dictionary-entry">')
         
-        # Add word and phonetics in header
-        word = data.get("word", "")
+        # Add word, CEFR/frequency, and phonetics in header
+        word = data.get("word", "").lower()
         phonetics = data.get("phonetics", [])
         phonetic_text = next((p.get("text", "") for p in phonetics if p.get("text")), "")
         
+        # Get CEFR and frequency data
+        cefr_freq = CEFR_FREQUENCY_DATA.get(word, {})
+        cefr = cefr_freq.get('cefr', '')
+        freq = cefr_freq.get('frequency', '')
+        
+        # Format CEFR and frequency info
+        cefr_freq_text = ''
+        if cefr and cefr != '?':
+            cefr_freq_text = f'{cefr} ({freq})'
+        elif freq:
+            cefr_freq_text = f'({freq})'
+        
         html.append('<div class="word-header">')
+        html.append('<div class="word-info">')
         if word:
             html.append(f'<span class="word">{word}</span>')
         if phonetic_text:
             html.append(f'<span class="phonetic">{phonetic_text}</span>')
+        html.append('</div>')
+        if cefr_freq_text:
+            html.append(f'<span class="cefr-freq">{cefr_freq_text}</span>')
         html.append('</div>')
         
         # Process each meaning

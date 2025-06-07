@@ -18,3 +18,10 @@ __pycache__/
 # Файли Anki (якщо експортуєш щось вручну)
 *.apkg
 *.anki2
+
+# Ignore everything in data/
+data/*
+
+# But include this one merged file
+!data/merged_cefr_frequency.csv
+
