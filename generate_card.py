@@ -706,6 +706,10 @@ if sentence_audio_data:
     else:
         print("⚠️ Аудіо файл речення не буде збережено через відсутність зʼєднання з Anki")
 
+# == Запит українського перекладу ==
+print("\n📝 Введіть український переклад:")
+translation_ua = input("🔤 Введіть слова перекладу (розділяйте комами): ").strip()
+
 # == Формування картки ==
 if anki_available:
     note = {
@@ -726,7 +730,7 @@ if anki_available:
             "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
             "Word_Audio": word_audio_ref,
             "Dictionary_Entry": data["dictionary_entry"],
-            "Translation_UA": "",
+            "Translation_UA": translation_ua,
             "Tags": ""
         },
         "options": {
