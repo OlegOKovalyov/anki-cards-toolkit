@@ -514,7 +514,7 @@ def fetch_dictionary_data(word, requested_pos=None):
     """
     Fetch word data from dictionary API with optional POS filtering.
     When POS is specified, returns only definitions, synonyms, and antonyms
-    from that specific part of speech.
+    from that specific part of speech, but always returns the full dictionary entry.
     """
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     try:
@@ -526,10 +526,10 @@ def fetch_dictionary_data(word, requested_pos=None):
         data = response.json()[0]
         meanings = data.get("meanings", [])
         
-        # Format full dictionary entry
+        # Always format full dictionary entry regardless of POS
         dictionary_entry = format_dictionary_entry(data)
         
-        # If POS is specified, strictly filter by that part of speech
+        # For other fields, filter by POS if specified
         if requested_pos:
             matching_meanings = [m for m in meanings if m.get("partOfSpeech") == requested_pos]
             if matching_meanings:
@@ -558,7 +558,7 @@ def fetch_dictionary_data(word, requested_pos=None):
             "related": format_word_list(thes_data["related"]),
             "similar": format_word_list(thes_data["similar"]),
             "partOfSpeech": meaning.get("partOfSpeech", ""),
-            "dictionary_entry": dictionary_entry
+            "dictionary_entry": dictionary_entry  # This now contains the full dictionary entry
         }
         
     except Exception as e:
