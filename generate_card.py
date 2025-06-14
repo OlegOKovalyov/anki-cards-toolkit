@@ -22,6 +22,36 @@ MODEL_NAME = "VocabCard_English_UA"
 DECK_NAME = "Default"
 PEXELS_API_KEY = 'R6T2MCrfCrNxu5SrXkO2OSapt8kJTwl4GYTFmEnSHQturYOKztFJAqXU'
 BIG_HUGE_API_KEY = '7d4ebb0df20e98dde8f3604e6759ab01'  # Big Huge Thesaurus API key
+ANKI_CONNECT_URL = "http://localhost:8765"
+
+# Шлях до файлу, де зберігатиметься назва останньої використаної колоди
+CONFIG_FILE = "last_deck.txt"
+
+def load_last_deck():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            return f.read().strip()
+    return "Default"
+
+def save_last_deck(deck_name):
+    with open(CONFIG_FILE, "w") as f:
+        f.write(deck_name.strip())
+
+def get_deck_name():
+    last_deck = load_last_deck()
+    user_input = input(f"Введіть назву колоди [{last_deck}]: ").strip()
+    deck = user_input if user_input else last_deck
+    save_last_deck(deck)
+    return deck
+
+def create_deck_if_not_exists(deck_name):
+    payload = {
+        "action": "createDeck",
+        "version": 6,
+        "params": {"deck": deck_name}
+    }
+    response = requests.post(ANKI_CONNECT_URL, json=payload).json()
+    # Якщо deck вже існує, Anki не повертає помилку — все ок.
 
 def load_cefr_frequency_data():
     """Load CEFR and frequency data from CSV file"""
@@ -569,6 +599,10 @@ def fetch_dictionary_data(word, requested_pos=None):
 # sentence = re.sub(r'\s+', ' ', pyperclip.paste().replace('\n', ' ')).strip()
 # print(f"\n📋 Скопійоване речення:\n{sentence}\n")
 
+deck_name = "Default"
+deck_name = get_deck_name()
+create_deck_if_not_exists(deck_name)
+
 # == Зчитуємо речення з буфера і очищуємо ==
 raw_text = pyperclip.paste()
 
@@ -713,7 +747,7 @@ translation_ua = input("🔤 Введіть слова перекладу (ро�
 # == Формування картки ==
 if anki_available:
     note = {
-        "deckName": DECK_NAME,
+        "deckName": deck_name,
         "modelName": MODEL_NAME,
         "fields": {
             "Word": word,
