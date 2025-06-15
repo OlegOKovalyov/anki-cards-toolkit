@@ -191,6 +191,75 @@ If Anki is not running or AnkiConnect is not installed, the script will fail wit
 source venv/bin/activate
 python generate_card.py
 ```
+## 🌐 Internet Usage, Anki Profile, Audio & Images
+
+This project is designed to work **online**. An active internet connection is required for the following features:
+- Fetching word definitions, synonyms, and related words from the Big Huge Thesaurus API
+- Retrieving image suggestions from [Pexels](https://www.pexels.com/)
+- Text-to-Speech (TTS) audio generation
+
+### 👤 Anki Profile: `User 1`
+
+By default, when Anki is installed and launched for the first time, it automatically creates a profile named **`User 1`**.  
+All generated media files (images, audio, etc.) will be stored under this profile in the following directory:
+
+• Linux:
+```bash
+~/.local/share/Anki2/User 1/
+```
+
+• Windows:
+```bash
+C:\Users\<YourUsername>\AppData\Roaming\Anki2\User 1\
+```
+If you change your Anki profile name, the directory will also change. To rename or manage profiles, refer to the official Anki documentation on profiles. This toolkit assumes the default profile User 1 is used.
+
+### 🔉 Local Audio Generation (TTS)
+
+The application uses Text-to-Speech (TTS) technology to generate audio files for:
+
+- the vocabulary word
+- the example sentence
+
+> TTS is a system that converts written text into spoken audio.
+> In this project, audio is generated using the gTTS (Google Text-to-Speech) Python library.
+
+Two audio files are created for each card:
+
+- tts_<word>.mp3
+- tts_sentence_<word>.mp3
+
+They are saved locally to:
+```bash
+~/.local/share/Anki2/User 1/collection.media/
+```
+If a card is deleted or replaced, audio files may temporarily move to:
+```bash
+~/.local/share/Anki2/User 1/collection.media/media.trash/
+```
+
+### 🖼️ Online Image Embedding from Pexels
+
+Images are embedded into Anki cards using direct URLs from the Pexels image platform.
+Images are not downloaded or stored locally. For example:
+```html
+<div style="width: 250px; height: 250px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+    <img src="https://images.pexels.com/photos/946337/pexels-photo-946337.jpeg?auto=compress&amp;cs=tinysrgb&amp;h=350" style="width: 100%; height: 100%; object-fit: contain;">
+</div>
+```
+Since images are loaded from external sources, an active internet connection is required to display them during card reviews in Anki.
+
+### ✏️ Manually Replacing Images
+
+If you are not satisfied with the automatically chosen image, you can manually replace it:
+1. Open Anki and locate the card.
+2. Click Edit to open the card content.
+3. Replace the current <img src="..."> tag with any other publicly accessible image URL to the question mark.
+• For example:
+```html
+<img src="https://www.example.com/your-custom-image.png">
+```
+Your custom image will now be shown in reviews instead of the original Pexels image.
 
 ## CEFR & Frequency integration
 
