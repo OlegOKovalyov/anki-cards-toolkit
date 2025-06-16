@@ -1,23 +1,17 @@
 import requests
 import pyperclip
-import json
 import re
-from duckduckgo_search import DDGS
 from gtts import gTTS
 import base64
 from io import BytesIO
-import requests
-from bs4 import BeautifulSoup
 import termios
 import tty
 import os
 import sys
 import webbrowser
 import tempfile
-import html
 import csv
 from dotenv import load_dotenv
-import os
 
 # Load .env file
 load_dotenv()
@@ -53,11 +47,26 @@ def fetch_pexels_images(query):
         if response.status_code == 200:
             data = response.json()
             return data.get("photos", [])
+        elif response.status_code == 401:
+            print("❌ Помилка авторизації Pexels API: недійсний API ключ")
+            return []
+        elif response.status_code == 429:
+            print("❌ Помилка Pexels API: перевищено ліміт запитів")
+            return []
         else:
             print(f"❌ Помилка отримання зображень: {response.status_code}")
             return []
+    except requests.exceptions.ConnectionError:
+        print("❌ Помилка підключення до Pexels API: перевірте підключення до інтернету")
+        return []
+    except requests.exceptions.Timeout:
+        print("❌ Помилка Pexels API: перевищено час очікування")
+        return []
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Помилка запиту до Pexels API: {str(e)}")
+        return []
     except Exception as e:
-        print(f"❌ Виняток при отриманні зображень: {e}")
+        print(f"❌ Неочікувана помилка при отриманні зображень: {str(e)}")
         return []
 
 def create_image_selection_page(images, word):
@@ -174,13 +183,33 @@ def get_deck_name():
     return deck
 
 def create_deck_if_not_exists(deck_name):
+    """Create a new deck in Anki if it doesn't exist"""
     payload = {
         "action": "createDeck",
         "version": 6,
         "params": {"deck": deck_name}
     }
-    response = requests.post(ANKI_CONNECT_URL, json=payload).json()
-    # Якщо deck вже існує, Anki не повертає помилку — все ок.
+    try:
+        response = requests.post(ANKI_CONNECT_URL, json=payload, timeout=5)
+        response.raise_for_status()  # Raise exception for bad status codes
+        result = response.json()
+        
+        if result.get("error"):
+            print(f"⚠️ Помилка створення колоди: {result['error']}")
+            return False
+        return True
+    except requests.exceptions.ConnectionError:
+        print("❌ Не вдалося підключитися до Anki")
+        return False
+    except requests.exceptions.Timeout:
+        print("❌ Перевищено час очікування відповіді від Anki")
+        return False
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Помилка запиту до Anki: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"❌ Неочікувана помилка при створенні колоди: {str(e)}")
+        return False
 
 def load_cefr_frequency_data():
     """Load CEFR and frequency data from CSV file"""
@@ -735,8 +764,14 @@ def send_media_file(name, b64_data):
     except requests.exceptions.ConnectionError:
         print(f"⚠️ Не вдалося зберегти {name}: немає зʼєднання з Anki")
         return False
+    except requests.exceptions.Timeout:
+        print(f"⚠️ Не вдалося зберегти {name}: перевищено час очікування")
+        return False
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Помилка запиту при збереженні {name}: {str(e)}")
+        return False
     except Exception as e:
-        print(f"⚠️ Помилка при збереженні {name}: {str(e)}")
+        print(f"⚠️ Неочікувана помилка при збереженні {name}: {str(e)}")
         return False
 
 # Before sending files to Anki, check connection
