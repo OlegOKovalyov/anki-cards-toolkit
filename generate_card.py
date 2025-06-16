@@ -16,16 +16,30 @@ import webbrowser
 import tempfile
 import html
 import csv
+from dotenv import load_dotenv
+import os
 
-# == Налаштування ==
-MODEL_NAME = "VocabCard_English_UA"
-DECK_NAME = "Default"
-PEXELS_API_KEY = 'R6T2MCrfCrNxu5SrXkO2OSapt8kJTwl4GYTFmEnSHQturYOKztFJAqXU'
-BIG_HUGE_API_KEY = '7d4ebb0df20e98dde8f3604e6759ab01'  # Big Huge Thesaurus API key
-ANKI_CONNECT_URL = "http://localhost:8765"
+# Load .env file
+load_dotenv()
 
-# Шлях до файлу, де зберігатиметься назва останньої використаної колоди
-CONFIG_FILE = "last_deck.txt"
+# == Configuration from .env ==
+# MODEL_NAME refers to the name of the Note Type in Anki.
+# To check or change it in Anki: open Anki → Tools → Manage Note Types.
+# Your note type should be  named as VocabCard_English_UA
+MODEL_NAME = os.getenv("MODEL_NAME")
+
+# DECK_NAME is the name of the Anki deck where the new cards will be added.
+# You can create or check deck names via Anki: open Anki → Decks → Add.
+# The initial deck name will be Default
+DECK_NAME = os.getenv("DECK_NAME")
+
+PEXELS_API_KEY = os.getenv("PEXELS_API_KEY") # API key for Pexels
+BIG_HUGE_API_KEY = os.getenv("BIG_HUGE_API_KEY") # API key for Big Huge Thesaurus
+ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
+
+# Path to the file where the name of the last used deck will be stored
+CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
+
 
 def fetch_pexels_images(query):
     """Fetch images from Pexels API"""

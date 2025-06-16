@@ -3,24 +3,27 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# Файли редактора Cursor/VS Code
+# Cursor/VS Code editor files
 .vscode/
 .cursor/
 
-# Системні резервні файли
+# System backup files
 *.swp
 *.swo
 *~
 
-# Логи (якщо зʼявляться)
+# Logs (if any)
 *.log
 
-# Файли Anki (якщо експортуєш щось вручну)
+# Anki files (if you export something manually)
 *.apkg
 *.anki2
 
 # Ignore everything in data/
 data/*
+
+# Configuration file
+.env
 
 # But include this one merged file
 !data/merged_cefr_frequency.csv

@@ -26,6 +26,28 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+> Make sure to activate the virtual environment every time you work on the project.
+
+### 🐍 Python Virtual Environment
+
+It is recommended to work in a virtual environment to keep dependencies isolated from your system Python.
+
+✅ Create a virtual environment:
+```bash
+python3 -m venv venv
+```
+✅ Activate the environment:
+
+• Linux/macOS:
+```bash
+source venv/bin/activate
+```
+• Windows:
+
+```bash
+venv\Scripts\activate
+```
+After activation, your terminal should show (venv) at the beginning of the prompt.
 
 To enable a natural-sounding pause between the sentence and the target word in each flashcard's audio playback, you need to generate a silent audio file. Run the following script to create a 1-second silent MP3:
 
@@ -63,6 +85,28 @@ To use this functionality:
 BIG_HUGE_API_KEY = 'your_api_key_here'  # Big Huge Thesaurus API key
 ```
 Without this key, word associations (synonyms, antonyms, etc.) will not be retrieved.
+
+### 🔐 Environment Configuration
+
+Before running the project, you need to create a `.env` file in the root directory.
+
+This file should contain the following settings:
+
+```
+MODEL_NAME=VocabCard_English_UA
+DECK_NAME=Default
+PEXELS_API_KEY=your_pexels_api_key
+BIG_HUGE_API_KEY=your_big_huge_thesaurus_key
+ANKI_CONNECT_URL=http://localhost:8765
+CONFIG_FILE=last_deck.txt
+```
+
+> ⚠️ Do not include quotes around values.
+
+The `.env` file should not be committed to version control. It is ignored by `.gitignore` for security.
+
+The project uses the [`python-dotenv`](https://pypi.org/project/python-dotenv/) library to load this configuration.
+
 
 ### Optional: Generating a Custom Silence MP3
 
@@ -203,7 +247,7 @@ This project is designed to work **online**. An active internet connection is re
 By default, when Anki is installed and launched for the first time, it automatically creates a profile named **`User 1`**.  
 All generated media files (images, audio, etc.) will be stored under this profile in the following directory:
 
-• Linux:
+• Linux/macOS::
 ```bash
 ~/.local/share/Anki2/User 1/
 ```
