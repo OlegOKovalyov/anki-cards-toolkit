@@ -12,6 +12,15 @@ import webbrowser
 import tempfile
 import csv
 from dotenv import load_dotenv
+from docs.error_messages import (
+    PEXELS_API_ERRORS,
+    ANKI_ERRORS,
+    TTS_ERRORS,
+    DICTIONARY_ERRORS,
+    IMAGE_SELECTION_ERRORS,
+    GENERAL_ERRORS,
+    SUCCESS_MESSAGES
+)
 
 # Load .env file
 load_dotenv()
@@ -48,25 +57,25 @@ def fetch_pexels_images(query):
             data = response.json()
             return data.get("photos", [])
         elif response.status_code == 401:
-            print("❌ Помилка авторизації Pexels API: недійсний API ключ")
+            print(PEXELS_API_ERRORS['auth'])
             return []
         elif response.status_code == 429:
-            print("❌ Помилка Pexels API: перевищено ліміт запитів")
+            print(PEXELS_API_ERRORS['rate_limit'])
             return []
         else:
-            print(f"❌ Помилка отримання зображень: {response.status_code}")
+            print(PEXELS_API_ERRORS['request'].format(error=response.status_code))
             return []
     except requests.exceptions.ConnectionError:
-        print("❌ Помилка підключення до Pexels API: перевірте підключення до інтернету")
+        print(PEXELS_API_ERRORS['connection'])
         return []
     except requests.exceptions.Timeout:
-        print("❌ Помилка Pexels API: перевищено час очікування")
+        print(PEXELS_API_ERRORS['timeout'])
         return []
     except requests.exceptions.RequestException as e:
-        print(f"❌ Помилка запиту до Pexels API: {str(e)}")
+        print(PEXELS_API_ERRORS['request'].format(error=str(e)))
         return []
     except Exception as e:
-        print(f"❌ Неочікувана помилка при отриманні зображень: {str(e)}")
+        print(PEXELS_API_ERRORS['unexpected'].format(error=str(e)))
         return []
 
 def create_image_selection_page(images, word):
@@ -174,7 +183,7 @@ def get_char():
 def select_image(images, word):
     """Interactive image selection interface with visual preview"""
     if not images:
-        print("Зображень не знайдено.")
+        print(IMAGE_SELECTION_ERRORS['no_images'])
         return None
     
     # Create and open selection page
@@ -197,9 +206,9 @@ def select_image(images, word):
                 os.unlink(gallery_path)
                 return images[choice - 1]['src']['medium']
             else:
-                print(f"❌ Будь ласка, введіть число від 1 до {len(images)}")
+                print(IMAGE_SELECTION_ERRORS['invalid_number'].format(max=len(images)))
         except ValueError:
-            print("❌ Будь ласка, введіть правильне число")
+            print(IMAGE_SELECTION_ERRORS['invalid_input'])
 
 def detect_pos_from_context(word, sentence):
     """Simple rule-based POS detection"""
