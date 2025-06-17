@@ -71,97 +71,24 @@ def fetch_pexels_images(query):
 
 def create_image_selection_page(images, word):
     """Create HTML page for image selection"""
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Вибір зображення для '{word}'</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                background-color: #1a1a1a;
-                color: #e0e0e0;
-            }}
-            .image-grid {{
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 20px;
-                max-width: 1200px;
-                margin: 0 auto;
-            }}
-            .image-container {{
-                position: relative;
-                aspect-ratio: 1;
-                border-radius: 8px;
-                overflow: hidden;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                transition: transform 0.2s;
-                background-color: #2a2a2a;
-            }}
-            .image-container:hover {{
-                transform: scale(1.02);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            }}
-            .image-container img {{
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }}
-            .image-number {{
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                background-color: rgba(0,0,0,0.8);
-                color: #ffa94d;
-                padding: 5px 10px;
-                border-radius: 4px;
-                font-weight: bold;
-            }}
-            .instructions {{
-                text-align: center;
-                margin: 20px 0;
-                padding: 20px;
-                background-color: #2a2a2a;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            }}
-            h1 {{
-                text-align: center;
-                color: #ffffff;
-                margin-bottom: 20px;
-            }}
-            .instructions p {{
-                margin: 10px 0;
-                color: #e0e0e0;
-            }}
-            .orange {{
-                color: #ffa94d;
-            }}
-        </style>
-    </head>
-    <body>
-        <h1>Вибір зображення для '<span class="orange">{word}</span>'</h1>
-        <div class="instructions">
-            <p>👀 Перегляньте зображення нижче та запам'ятайте номер (1-16) бажаного зображення.</p>
-            <p>Поверніться до терміналу для вибору.</p>
-        </div>
-        <div class="image-grid">
-    """
+    # Read the template file
+    template_path = os.path.join(os.path.dirname(__file__), 'templates', 'image_selection.html')
+    with open(template_path, 'r', encoding='utf-8') as f:
+        template = f.read()
     
+    # Generate the image grid HTML
+    image_grid_html = ""
     for i, photo in enumerate(images, 1):
-        html += f"""
+        image_grid_html += f"""
             <div class="image-container">
                 <img src="{photo['src']['medium']}" alt="Image {i}">
                 <div class="image-number">{i}</div>
             </div>
         """
     
-    html += """
-        </div>
-    </body>
-    </html>
-    """
+    # Replace placeholders in the template
+    html = template.replace('{{word}}', word)
+    html = html.replace('{{image_grid}}', image_grid_html)
     
     return html
 
