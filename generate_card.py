@@ -11,6 +11,7 @@ import sys
 import webbrowser
 import tempfile
 import csv
+from nltk.stem import WordNetLemmatizer
 from dotenv import load_dotenv
 from docs.error_messages import (
     PEXELS_API_ERRORS,
@@ -615,14 +616,21 @@ data = fetch_dictionary_data(word, pos)
 if not data:
     exit(1)
 
-# == Підсвічення слова в реченні ==
-highlighted = re.sub(
-    rf'\b({re.escape(word)}\w*)\b',
-    r'<span style="color:orange;font-weight:bold">\1</span>',
-    sentence,
-    count=1,
-    flags=re.IGNORECASE
-)
+# == Highlight a word in a sentence ==
+lemmatizer = WordNetLemmatizer()
+
+def highlight_focus_word(sentence, focus_word):
+    def replacer(match):
+        token = match.group(0)
+        lemma = lemmatizer.lemmatize(token.lower(), pos='v')
+        if lemma == focus_word.lower():
+            return f'<span style="color:orange;font-weight:bold">{token}</span>'
+        return token
+
+    # Підміняємо кожне слово в реченні
+    return re.sub(r'\b\w+\b', replacer, sentence, flags=re.IGNORECASE) 
+
+highlighted = highlight_focus_word(sentence, word)
 
 # == Image Selection ==
 print("\n🔍 Пошук відповідних зображень...")

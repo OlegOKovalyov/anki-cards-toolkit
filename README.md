@@ -55,6 +55,15 @@ To enable a natural-sounding pause between the sentence and the target word in e
 python scripts/generate_silence.py
 ```
 
+### 🔤 NLTK resources
+
+This project uses NLTK lemmatization (WordNet).  
+After installing dependencies, run the following once:
+
+```bash
+python scripts/install_nltk_data.py
+
+
 This will generate a file named silence_1sec.mp3, which will be placed automatically into Anki’s media folder (typically located at ~/.local/share/Anki2/User 1/collection.media/ or similar, depending on your system). This file will be used as part of the audio sequence for each card.
 
 ### 🔑 Pexels API Key (Optional, for image support)
