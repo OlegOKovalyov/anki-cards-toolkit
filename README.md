@@ -1,8 +1,8 @@
-# anki-cards-toolkit
+# 🃏 anki-cards-toolkit
 
 <img src="https://raw.githubusercontent.com/OlegOKovalyov/anki-cards-toolkit/main/anki-flashcard.png" alt="Anki Flashcard Toolkit Logo" width="200"/>
 
-## Project Overview
+## 🧭 Project Overview
 
 This toolkit automates the creation of rich Anki flashcards for English vocabulary learning. It integrates pronunciation, imagery, CEFR level, and frequency ranking for focused memorization.
 
@@ -10,12 +10,12 @@ The core workflow:
 - Reads a sentence from the clipboard
 - Allows selecting a **focus word**
 - Automatically generates pronunciation audio (TTS)
-- Embeds a relevant image using DuckDuckGo search
+- Embeds a relevant image using Pexels free online media library
 - Adds CEFR level and frequency category next to the focus word
-- Outputs a ready-to-use HTML front template for the Anki card
+- Outputs a ready-to-use HTML front and back template for the Anki card
 
 
-## Installation
+## 🔧 Installation
 
 Clone the repository and set up a virtual environment:
 
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 ```
 > Make sure to activate the virtual environment every time you work on the project.
 
-### 🐍 Python Virtual Environment
+### 🐉 Python Virtual Environment
 
 It is recommended to work in a virtual environment to keep dependencies isolated from your system Python.
 
@@ -49,11 +49,14 @@ venv\Scripts\activate
 ```
 After activation, your terminal should show (venv) at the beginning of the prompt.
 
+### 🔈 Generating Silent Audio for Flashcards
+
 To enable a natural-sounding pause between the sentence and the target word in each flashcard's audio playback, you need to generate a silent audio file. Run the following script to create a 1-second silent MP3:
 
 ```bash
 python scripts/generate_silence.py
 ```
+This will generate a file named silence_1sec.mp3, which will be placed automatically into Anki’s media folder (typically located at ~/.local/share/Anki2/User 1/collection.media/ or similar, depending on your system). This file will be used as part of the audio sequence for each card.
 
 ### 🔤 NLTK resources
 
@@ -62,9 +65,7 @@ After installing dependencies, run the following once:
 
 ```bash
 python scripts/install_nltk_data.py
-
-
-This will generate a file named silence_1sec.mp3, which will be placed automatically into Anki’s media folder (typically located at ~/.local/share/Anki2/User 1/collection.media/ or similar, depending on your system). This file will be used as part of the audio sequence for each card.
+```
 
 ### 🔑 Pexels API Key (Optional, for image support)
 
@@ -72,7 +73,7 @@ If you want to automatically fetch relevant images for your cards from Pexels.co
 
 1. Go to https://www.pexels.com/api/ and create an account (or log in).
 2. Click "**Get API Key**" and copy your personal key.
-3. Open the generate_card.py file and replace the placeholder value of PEXELS_API_KEY with your actual key:
+3. Open the .env file and replace the placeholder value of your_pexels_api_key with your actual key:
 ```py
 PEXELS_API_KEY = 'your_actual_pexels_api_key_here'
 ```
@@ -89,7 +90,7 @@ To use this functionality:
 2. Sign up or log in to your account.
 3. Generate a free API key (you will receive a string similar to 7d4eb...9ab01).
 4. Open the file generate_card.py.
-5. At the top of the file, replace the placeholder with your API key:
+5. In the .env file, replace the placeholder your_big_huge_thesaurus_key with your actual API key:
 ```py
 BIG_HUGE_API_KEY = 'your_api_key_here'  # Big Huge Thesaurus API key
 ```
@@ -117,7 +118,7 @@ The `.env` file should not be committed to version control. It is ignored by `.g
 The project uses the [`python-dotenv`](https://pypi.org/project/python-dotenv/) library to load this configuration.
 
 
-### Optional: Generating a Custom Silence MP3
+### 🔇 Optional: Generating a Custom Silence MP3
 
 If you want to customize the duration of the pause, you can edit the script scripts/generate_silence.py by changing the duration_ms parameter, which is specified in milliseconds. For example:
 
@@ -127,7 +128,7 @@ generate_silence(duration_ms=2000)  # creates a 2-second silence
 
 You can run the script again after modifying the value to regenerate the file with the new duration.
 
-### Using the Card Templates in Anki
+### 🧩 Using the Card Templates in Anki
 
 To ensure that the generated Anki flashcards are displayed correctly, the project includes two HTML template files located in the /templates directory:
 
@@ -137,7 +138,7 @@ To ensure that the generated Anki flashcards are displayed correctly, the projec
 
 These templates are intended for use with a custom card type in Anki. We recommend creating a new card type based on the default Basic type and naming it something like VocabCard_English_UA. You can do this by navigating to: Anki → Browse → Cards (Ctrl+L) → Front Template / Back Template. Copy the contents of front_template.html and back_template.html into the corresponding sections of your newly created card type.
 
-Note: The back_template.html file includes a short silent audio clip before playing the focus word’s audio. This is done by inserting the following block:
+>Note: The back_template.html file includes a short silent audio clip before playing the focus word’s audio. This is done by inserting the following block:
 
 ```html
 <div style="display: none;">
@@ -147,7 +148,47 @@ Note: The back_template.html file includes a short silent audio clip before play
 ```
 This allows for a natural pause between the sentence and the word pronunciation, improving listening and memorization.
 
-### Deck Selection and Persistence
+### ⚠️ Required Fields
+
+In addition to customizing the templates, you must manually create the following fields for your custom card type in Anki. Without these fields, the templates and generated data will not work correctly.
+
+Here is the full list of fields used by the project, in the recommended order:
+
+1. `Front` *(default Basic field — keep it)*
+2. `Back` *(default Basic field — keep it)*
+3. `Sentence`
+4. `Sentence_Audio`
+5. `Definition`
+6. `Synonyms`
+7. `Related`
+8. `Similar`
+9. `Antonyms`
+10. `Sentence_Repeated`
+11. `Image`
+12. `Word`
+13. `Irregular_Forms` *(used only if the focus word is an irregular verb)*
+14. `Word_Audio`
+15. `Dictionary_Entry`
+16. `Translation_UA`
+
+To add these fields:
+1. Open Anki.
+2. Go to **Browse** → **Cards**.
+3. Click **Fields…**.
+4. Add each field manually in the order shown above.
+
+Anki will automatically ignore empty fields when displaying cards, so optional content (such as `Irregular_Forms`) will not interfere with the card appearance.
+
+> ⚠️ Important:
+> When setting up the card fields in Anki (Browse → Card Types → VocabCard_English_UA → Fields), make sure that the first field in the >list >is one that is always filled, such as Word or Sentence.
+> Anki uses the first field to determine whether a note is empty. If this field is blank, the note will be rejected with the error:
+```
+cannot create note because it is empty
+```
+> Fields like Front or Back are often left empty in this toolkit and should not be placed first in the list. It would be best to put the focus word **Word** field as the first field.
+
+
+### 🗂️ Deck Selection and Persistence
 
 Starting from version 1.0.0, the toolkit supports dynamic deck selection during card creation.  
 When generating a new card, the script will now:
@@ -206,7 +247,7 @@ Roman history is the story of the Romans’ conquest of Italy and the entire Med
 ✅ Картку додано: ID = 1749913745076
 ```
 
-## Running the tool
+## ▶️ Running the tool
 
 Before using this tool to generate Anki flashcards, make sure the following prerequisites are met:
 
@@ -314,7 +355,7 @@ If you are not satisfied with the automatically chosen image, you can manually r
 ```
 Your custom image will now be shown in reviews instead of the original Pexels image.
 
-## CEFR & Frequency integration
+## 🧠 CEFR & Frequency integration
 
 The project supports adding both CEFR levels (A1–C2) and word frequency category (1–9) to each word used in the flashcard. The relevant merged dataset is stored in data/merged_cefr_frequency.csv and is used by the card generation script to enrich flashcards with this metadata.
 
@@ -449,7 +490,7 @@ This feedback helps Anki’s spaced repetition algorithm optimize your future re
 • Focus on quality over quantity: meaningful, real-world context matters more than isolated words.
 
 
-## License
+## 📜 License
 
 This project is distributed under the MIT License. See LICENSE for more information.
 

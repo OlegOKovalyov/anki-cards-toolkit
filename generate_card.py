@@ -22,6 +22,7 @@ from docs.error_messages import (
     GENERAL_ERRORS,
     SUCCESS_MESSAGES
 )
+from data.irregular_verbs import irregular_verbs
 
 # Load .env file
 load_dotenv()
@@ -253,6 +254,16 @@ def detect_pos_from_context(word, sentence):
     
     # Default to noun if no other patterns match
     return "noun"
+
+# == Функція для визначення, чи слово — неправильне дієслово, і отримання форм ==
+def get_irregular_forms(word):
+    """
+    Повертає список форм неправильного дієслова, якщо слово є інфінітивом.
+    Якщо слово не є неправильним дієсловом - повертає None.
+    """
+    # Нижній регістр для надійного пошуку
+    key = word.lower()
+    return irregular_verbs.get(key)
 
 def fetch_thesaurus_data(word, pos=None):
     """
@@ -733,6 +744,13 @@ if sentence_audio_data:
     else:
         print("⚠️ Аудіо файл речення не буде збережено через відсутність зʼєднання з Anki")
 
+# == Отримуємо всі форми неправильного дієслова ==
+forms = get_irregular_forms(word)
+if forms:
+    irregular_forms_field = " - ".join(forms)  # Наприклад, "flee - fled - fled"
+else:
+    irregular_forms_field = ""
+
 # == Запит українського перекладу ==
 print("\n📝 Введіть український переклад:")
 translation_ua = input("🔤 Введіть слова перекладу (розділяйте комами): ").strip()
@@ -756,6 +774,7 @@ if anki_available:
             "Sentence_Repeated": sentence,
             "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
             "Word_Audio": word_audio_ref,
+            "Irregular_Forms": irregular_forms_field,
             "Dictionary_Entry": data["dictionary_entry"],
             "Translation_UA": translation_ua,
             "Tags": ""

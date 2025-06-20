@@ -25,6 +25,8 @@ data/*
 # Configuration file
 .env
 
-# But include this one merged file
+# But include this two files
 !data/merged_cefr_frequency.csv
+!data/irregular_verbs.py
+
 
