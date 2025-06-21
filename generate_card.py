@@ -23,6 +23,7 @@ from docs.error_messages import (
     SUCCESS_MESSAGES
 )
 from data.irregular_verbs import irregular_verbs
+from src.clipboard_service import get_clean_sentence_from_clipboard
 
 # Load .env file
 load_dotenv()
@@ -586,34 +587,16 @@ def fetch_dictionary_data(word, requested_pos=None):
         print(f"❌ Виняток при отриманні даних зі словника: {e}")
         return None
 
-# == Зчитуємо речення з буфера ==
-# sentence = re.sub(r'\s+', ' ', pyperclip.paste().replace('\n', ' ')).strip()
-# print(f"\n📋 Скопійоване речення:\n{sentence}\n")
-
+# == Deck get/creation ==
 deck_name = "Default"
 deck_name = get_deck_name()
 create_deck_if_not_exists(deck_name)
 
-# == Зчитуємо речення з буфера і очищуємо ==
-raw_text = pyperclip.paste()
-
-# Обробка:
-# 1. Видаляємо перенесення з дефісом (generos-\nity → generosity)
-# 2. Прибираємо всі переноси рядків (залишки)
-# 3. Прибираємо зайві пробіли перед розділовими знаками
-# 4. Заміна декількох пробілів на один
-import re
-sentence = raw_text
-sentence = re.sub(r'-\s*\n\s*', '', sentence)       # перенос із дефісом
-sentence = re.sub(r'\s*\n\s*', ' ', sentence)        # звичайні переноси
-sentence = re.sub(r'\s+([.,:;!?])', r'\1', sentence) # пробіл перед пунктуацією
-sentence = re.sub(r'\s{2,}', ' ', sentence)          # подвійні пробіли
-sentence = sentence.strip()
-
+# == Read the sentence from the buffer and clear it ==
+sentence = get_clean_sentence_from_clipboard()
 print(f"\n📋 Скопійоване речення:\n{sentence}\n")
 
-
-# == Запит слова ==
+# == Word query ==
 word = input("🔤 Введи слово, яке хочеш вивчати: ").strip().lower()
 
 # Detect part of speech and show it in the prompt
