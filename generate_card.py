@@ -24,6 +24,7 @@ from docs.error_messages import (
 )
 from data.irregular_verbs import irregular_verbs
 from src.clipboard_service import get_clean_sentence_from_clipboard
+from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 
 # Load .env file
 load_dotenv()
@@ -212,59 +213,6 @@ def select_image(images, word):
                 print(IMAGE_SELECTION_ERRORS['invalid_number'].format(max=len(images)))
         except ValueError:
             print(IMAGE_SELECTION_ERRORS['invalid_input'])
-
-def detect_pos_from_context(word, sentence):
-    """Simple rule-based POS detection"""
-    word = word.lower()
-    sentence = sentence.lower()
-    
-    # Find the word and its surrounding context
-    word_pattern = re.compile(r'\b' + re.escape(word) + r'\w*\b')
-    match = word_pattern.search(sentence)
-    if not match:
-        return None
-        
-    words = sentence.split()
-    word_index = None
-    for i, w in enumerate(words):
-        if word in w:
-            word_index = i
-            break
-            
-    if word_index is None:
-        return None
-        
-    # Simple rules for POS detection
-    # Check for adjective
-    if word.endswith(('able', 'ible', 'al', 'ful', 'ic', 'ive', 'less', 'ous')):
-        return "adjective"
-    
-    # Check for adverb
-    if word.endswith('ly'):
-        return "adverb"
-    
-    # Check for verb
-    if word_index > 0:
-        prev_word = words[word_index - 1]
-        if prev_word in ['to', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can']:
-            return "verb"
-    
-    # Check for common verb endings
-    if word.endswith(('ate', 'ize', 'ise', 'ify')):
-        return "verb"
-    
-    # Default to noun if no other patterns match
-    return "noun"
-
-# == Функція для визначення, чи слово — неправильне дієслово, і отримання форм ==
-def get_irregular_forms(word):
-    """
-    Повертає список форм неправильного дієслова, якщо слово є інфінітивом.
-    Якщо слово не є неправильним дієсловом - повертає None.
-    """
-    # Нижній регістр для надійного пошуку
-    key = word.lower()
-    return irregular_verbs.get(key)
 
 def fetch_thesaurus_data(word, pos=None):
     """
