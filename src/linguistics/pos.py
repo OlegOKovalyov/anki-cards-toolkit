@@ -19,82 +19,52 @@ from data.irregular_verbs import irregular_verbs
 
 def detect_pos_from_context(word, sentence):
     """
-    Improved POS detection using NLTK's pos_tag() for more accurate tagging.
-    Handles irregular verbs, inflected forms, and complex sentence structures.
-    
+    Optimized POS detection: fast suffix check, then NLTK tagging, then lemmatization, with early return. Irregular verb logic removed.
     Args:
         word (str): The word to detect POS for
         sentence (str): The sentence containing the word
-        
     Returns:
         str: "noun", "verb", "adjective", "adverb", or None if not detected
     """
     try:
-        # Initialize NLTK components
         lemmatizer = WordNetLemmatizer()
-        
-        # Clean and prepare the word and sentence
         word = word.lower().strip()
         sentence = sentence.strip()
-        
-        # Tokenize the sentence
-        tokens = word_tokenize(sentence)
-        
-        # Get POS tags for all tokens
-        tagged = pos_tag(tokens)
-        
-        # First pass: look for exact word match (case-insensitive)
-        for token, tag in tagged:
-            if token.lower() == word:
-                # Map Penn Treebank tags to our categories
-                if tag.startswith('VB'):  # VB, VBD, VBG, VBN, VBP, VBZ
-                    return 'verb'
-                elif tag.startswith('JJ'):  # JJ, JJR, JJS
-                    return 'adjective'
-                elif tag.startswith('RB'):  # RB, RBR, RBS
-                    return 'adverb'
-                elif tag.startswith('NN'):  # NN, NNS, NNP, NNPS
-                    return 'noun'
-        
-        # Second pass: check for lemmatized forms (for irregular verbs)
-        word_lemma = lemmatizer.lemmatize(word, pos='v')  # Try verb lemmatization first
-        
-        for token, tag in tagged:
-            token_lemma = lemmatizer.lemmatize(token.lower(), pos='v')
-            if token_lemma == word_lemma:
-                if tag.startswith('VB'):
-                    return 'verb'
-        
-        # Third pass: check irregular verb forms
-        irregular_forms = get_irregular_forms(word)
-        if irregular_forms:
-            # Check if any form of this irregular verb appears in the sentence
-            for token, tag in tagged:
-                if token.lower() in irregular_forms and tag.startswith('VB'):
-                    return 'verb'
-        
-        # Fourth pass: check if the word is a form of an irregular verb
-        for base_form, forms in irregular_verbs.items():
-            if word in forms:
-                # Check if this form appears as a verb in the sentence
-                for token, tag in tagged:
-                    if token.lower() == word and tag.startswith('VB'):
-                        return 'verb'
-        
-        # Fifth pass: fallback to suffix-based detection for edge cases
+
+        # 1. Fast suffix-based detection (early return if confident)
         if word.endswith(('able', 'ible', 'al', 'ful', 'ic', 'ive', 'less', 'ous')):
             return 'adjective'
         elif word.endswith('ly'):
             return 'adverb'
         elif word.endswith(('ate', 'ize', 'ise', 'ify')):
             return 'verb'
-        
-        # Default to noun if no other patterns match
+
+        # 2. NLTK tokenization and POS tagging
+        tokens = word_tokenize(sentence)
+        tagged = pos_tag(tokens)
+        for token, tag in tagged:
+            if token.lower() == word:
+                if tag.startswith('VB'):
+                    return 'verb'
+                elif tag.startswith('JJ'):
+                    return 'adjective'
+                elif tag.startswith('RB'):
+                    return 'adverb'
+                elif tag.startswith('NN'):
+                    return 'noun'
+
+        # 3. Lemmatization-based inference (for verbs)
+        word_lemma = lemmatizer.lemmatize(word, pos='v')
+        for token, tag in tagged:
+            token_lemma = lemmatizer.lemmatize(token.lower(), pos='v')
+            if token_lemma == word_lemma and tag.startswith('VB'):
+                return 'verb'
+
+        # 4. Default to noun if no other patterns match
         return 'noun'
-        
+
     except Exception as e:
         print(f"⚠️ Помилка при визначенні частини мови: {str(e)}")
-        # Fallback to simple rule-based detection
         return _fallback_pos_detection(word, sentence)
 
 
