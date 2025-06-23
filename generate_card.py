@@ -23,7 +23,7 @@ from docs.error_messages import (
     SUCCESS_MESSAGES
 )
 from data.irregular_verbs import irregular_verbs
-from src.clipboard_service import get_clean_sentence_from_clipboard
+from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 
 # Load .env file
