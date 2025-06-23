@@ -47,6 +47,22 @@ ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
 # Path to the file where the name of the last used deck will be stored
 CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
 
+# == Check Anki connection before anything else ==
+def check_anki_connect():
+    """Check if AnkiConnect is available. If not, print instructions and exit immediately."""
+    try:
+        response = requests.get("http://localhost:8765")
+        return True
+    except requests.exceptions.ConnectionError:
+        print("\n❌ Помилка: Не вдалося підключитися до Anki.")
+        print("Будь ласка, запустіть Anki та спробуйте ще раз.")
+        print("📝 Переконайтеся, що:")
+        print("   1. Anki запущено")
+        print("   2. Встановлено додаток AnkiConnect")
+        print("   3. AnkiConnect налаштовано на порт 8765")
+        sys.exit(1)
+
+check_anki_connect()
 
 def fetch_pexels_images(query):
     """Fetch images from Pexels API"""
@@ -133,13 +149,12 @@ def create_deck_if_not_exists(deck_name):
         response = requests.post(ANKI_CONNECT_URL, json=payload, timeout=5)
         response.raise_for_status()  # Raise exception for bad status codes
         result = response.json()
-        
         if result.get("error"):
             print(f"⚠️ Помилка створення колоди: {result['error']}")
             return False
         return True
     except requests.exceptions.ConnectionError:
-        print("❌ Не вдалося підключитися до Anki")
+        # Do not print error here; already handled at startup
         return False
     except requests.exceptions.Timeout:
         print("❌ Перевищено час очікування відповіді від Anki")
@@ -541,6 +556,7 @@ deck_name = get_deck_name()
 create_deck_if_not_exists(deck_name)
 
 # == Read the sentence from the buffer and clear it ==
+# (No need to check Anki connection here anymore)
 sentence = get_clean_sentence_from_clipboard()
 print(f"\n📋 Скопійоване речення:\n{sentence}\n")
 
@@ -615,19 +631,6 @@ if sentence_audio_ref is None or sentence_audio_data is None:
     exit(0)
 
 # == Додавання мультимедійних файлів до Anki ==
-def check_anki_connect():
-    """Check if AnkiConnect is available"""
-    try:
-        response = requests.get("http://localhost:8765")
-        return True
-    except requests.exceptions.ConnectionError:
-        print("\n❌ Помилка: Не вдалося підключитися до Anki.")
-        print("📝 Переконайтеся, що:")
-        print("   1. Anki запущено")
-        print("   2. Встановлено додаток AnkiConnect")
-        print("   3. AnkiConnect налаштовано на порт 8765")
-        return False
-
 def send_media_file(name, b64_data):
     """Send media file to Anki with error handling"""
     try:
@@ -661,19 +664,13 @@ def send_media_file(name, b64_data):
         return False
 
 # Before sending files to Anki, check connection
-anki_available = check_anki_connect()
+# anki_available = True  # Already checked at the start, so always True
 
 if word_audio_data:
-    if anki_available:
-        send_media_file(f"tts_{word}.mp3", word_audio_data)
-    else:
-        print("⚠️ Аудіо файл не буде збережено через відсутність зʼєднання з Anki")
+    send_media_file(f"tts_{word}.mp3", word_audio_data)
 
 if sentence_audio_data:
-    if anki_available:
-        send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
-    else:
-        print("⚠️ Аудіо файл речення не буде збережено через відсутність зʼєднання з Anki")
+    send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
 
 # == Отримуємо всі форми неправильного дієслова ==
 forms = get_irregular_forms(word)
@@ -687,54 +684,47 @@ print("\n📝 Введіть український переклад:")
 translation_ua = input("🔤 Введіть слова перекладу (розділяйте комами): ").strip()
 
 # == Формування картки ==
-if anki_available:
-    note = {
-        "deckName": deck_name,
-        "modelName": MODEL_NAME,
-        "fields": {
-            "Word": word,
-            "Front": "",
-            "Back": "",
-            "Image": f'<div style="width: 250px; height: 250px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;"><img src="{image_url}" style="width: 100%; height: 100%; object-fit: contain;"></div>' if image_url else "",
-            "Definition": data["definition"],
-            "Synonyms": data["synonyms"],
-            "Antonyms": data["antonyms"],
-            "Related": data["related"],
-            "Similar": data["similar"],
-            "Sentence": highlighted,
-            "Sentence_Repeated": sentence,
-            "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
-            "Word_Audio": word_audio_ref,
-            "Irregular_Forms": irregular_forms_field,
-            "Dictionary_Entry": data["dictionary_entry"],
-            "Translation_UA": translation_ua,
-            "Tags": ""
-        },
-        "options": {
-            "allowDuplicate": False
-        },
-        "tags": []
-    }
+note = {
+    "deckName": deck_name,
+    "modelName": MODEL_NAME,
+    "fields": {
+        "Word": word,
+        "Front": "",
+        "Back": "",
+        "Image": f'<div style="width: 250px; height: 250px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;"><img src="{image_url}" style="width: 100%; height: 100%; object-fit: contain;"></div>' if image_url else "",
+        "Definition": data["definition"],
+        "Synonyms": data["synonyms"],
+        "Antonyms": data["antonyms"],
+        "Related": data["related"],
+        "Similar": data["similar"],
+        "Sentence": highlighted,
+        "Sentence_Repeated": sentence,
+        "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
+        "Word_Audio": word_audio_ref,
+        "Irregular_Forms": irregular_forms_field,
+        "Dictionary_Entry": data["dictionary_entry"],
+        "Translation_UA": translation_ua,
+        "Tags": ""
+    },
+    "options": {
+        "allowDuplicate": False
+    },
+    "tags": []
+}
 
-    try:
-        result = requests.post("http://localhost:8765", json={
-            "action": "addNote",
-            "version": 6,
-            "params": {"note": note}
-        }, timeout=5).json()
+try:
+    result = requests.post("http://localhost:8765", json={
+        "action": "addNote",
+        "version": 6,
+        "params": {"note": note}
+    }, timeout=5).json()
 
-        if result.get("error") is None:
-            print(f"✅ Картку додано: ID = {result['result']}")
-        else:
-            print(f"❌ Помилка додавання картки: {result['error']}")
-            
-    except requests.exceptions.ConnectionError:
-        print("❌ Не вдалося додати картку: немає зʼєднання з Anki")
-    except Exception as e:
-        print(f"❌ Помилка при додаванні картки: {str(e)}")
-else:
-    print("\n⚠️ Картку не було додано через відсутність зʼєднання з Anki")
-    print("💡 Щоб додати картку пізніше:")
-    print(f"   1. Запустіть Anki")
-    print(f"   2. Переконайтеся, що встановлено AnkiConnect")
-    print(f"   3. Запустіть скрипт знову")
+    if result.get("error") is None:
+        print(f"✅ Картку додано: ID = {result['result']}")
+    else:
+        print(f"❌ Помилка додавання картки: {result['error']}")
+        
+except requests.exceptions.ConnectionError:
+    print("❌ Не вдалося додати картку: немає зʼєднання з Anki")
+except Exception as e:
+    print(f"❌ Помилка при додаванні картки: {str(e)}")
