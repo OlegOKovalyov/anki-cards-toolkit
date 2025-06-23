@@ -25,6 +25,7 @@ from docs.error_messages import (
 from data.irregular_verbs import irregular_verbs
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
+from src.utils.highlight import highlight_focus_word
 
 # Load .env file
 load_dotenv()
@@ -575,20 +576,8 @@ if not data:
     exit(1)
 
 # == Highlight a word in a sentence ==
-lemmatizer = WordNetLemmatizer()
-
-def highlight_focus_word(sentence, focus_word):
-    def replacer(match):
-        token = match.group(0)
-        lemma = lemmatizer.lemmatize(token.lower(), pos='v')
-        if lemma == focus_word.lower():
-            return f'<span style="color:orange;font-weight:bold">{token}</span>'
-        return token
-
-    # Підміняємо кожне слово в реченні
-    return re.sub(r'\b\w+\b', replacer, sentence, flags=re.IGNORECASE) 
-
-highlighted = highlight_focus_word(sentence, word)
+pos_map = {'noun': 'n', 'verb': 'v', 'adjective': 'a', 'adverb': 'r'}
+highlighted = highlight_focus_word(sentence, word, pos=pos_map.get(pos, 'n'))
 
 # == Image Selection ==
 print("\n🔍 Пошук відповідних зображень...")
