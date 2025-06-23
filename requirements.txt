@@ -6,3 +6,4 @@ pydub
 requests>=2.25.1
 python-dotenv
 nltk>=3.8.1
+pytest

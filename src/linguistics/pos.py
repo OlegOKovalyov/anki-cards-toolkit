@@ -137,32 +137,6 @@ def get_irregular_forms(word):
     return irregular_verbs.get(key)
 
 
-def test_pos_detection():
-    """Test function for POS detection with various examples"""
-    test_cases = [
-        ("fled", "He fled from danger", "verb"),
-        ("ran", "She ran quickly", "verb"),
-        ("took", "He took the book", "verb"),
-        ("beautiful", "A beautiful flower", "adjective"),
-        ("quickly", "She ran quickly", "adverb"),
-        ("book", "I read a book", "noun"),
-        ("running", "He is running fast", "verb"),
-        ("happy", "She is happy", "adjective"),
-        ("slowly", "He walks slowly", "adverb"),
-        ("house", "The house is big", "noun"),
-    ]
-    
-    print("🧪 Testing POS Detection:")
-    print("=" * 50)
-    
-    for word, sentence, expected in test_cases:
-        result = detect_pos_from_context(word, sentence)
-        status = "✅" if result == expected else "❌"
-        print(f"{status} '{word}' in '{sentence}' -> {result} (expected: {expected})")
-    
-    print("=" * 50)
-
-
 if __name__ == "__main__":
     # Ensure NLTK data is available for standalone script execution
     try:
@@ -173,7 +147,4 @@ if __name__ == "__main__":
         nltk.download('wordnet', quiet=True)
         nltk.download('omw-1.4', quiet=True)
     except Exception as e:
-        print(f"⚠️ Could not download NLTK data for testing: {e}")
-
-    # Run tests
-    test_pos_detection() 
+        print(f"⚠️ Could not download NLTK data for testing: {e}") 
