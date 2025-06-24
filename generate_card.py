@@ -26,6 +26,8 @@ from data.irregular_verbs import irregular_verbs
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
+from src.services.pexels_api import fetch_pexels_images
+from src.services.dictionary_service import fetch_word_data
 
 # Load .env file
 load_dotenv()
@@ -64,40 +66,6 @@ def check_anki_connect():
         sys.exit(1)
 
 check_anki_connect()
-
-def fetch_pexels_images(query):
-    """Fetch images from Pexels API"""
-    url = f"https://api.pexels.com/v1/search?query={query}&per_page=16"
-    headers = {
-        "Authorization": PEXELS_API_KEY
-    }
-    
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            return data.get("photos", [])
-        elif response.status_code == 401:
-            print(PEXELS_API_ERRORS['auth'])
-            return []
-        elif response.status_code == 429:
-            print(PEXELS_API_ERRORS['rate_limit'])
-            return []
-        else:
-            print(PEXELS_API_ERRORS['request'].format(error=response.status_code))
-            return []
-    except requests.exceptions.ConnectionError:
-        print(PEXELS_API_ERRORS['connection'])
-        return []
-    except requests.exceptions.Timeout:
-        print(PEXELS_API_ERRORS['timeout'])
-        return []
-    except requests.exceptions.RequestException as e:
-        print(PEXELS_API_ERRORS['request'].format(error=str(e)))
-        return []
-    except Exception as e:
-        print(PEXELS_API_ERRORS['unexpected'].format(error=str(e)))
-        return []
 
 def create_image_selection_page(images, word):
     """Create HTML page for image selection"""
@@ -496,61 +464,6 @@ def format_word_list(words):
     """Format a list of words, returning empty string if no words found."""
     return ", ".join(words) if words else ""
 
-def fetch_dictionary_data(word, requested_pos=None):
-    """
-    Fetch word data from dictionary API with optional POS filtering.
-    When POS is specified, returns only definitions, synonyms, and antonyms
-    from that specific part of speech, but always returns the full dictionary entry.
-    """
-    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
-    try:
-        response = requests.get(url)
-        if response.status_code != 200:
-            print(f"❌ Помилка: слово '{word}' не знайдено у словнику.")
-            return None
-            
-        data = response.json()[0]
-        meanings = data.get("meanings", [])
-        
-        # Always format full dictionary entry regardless of POS
-        dictionary_entry = format_dictionary_entry(data)
-        
-        # For other fields, filter by POS if specified
-        if requested_pos:
-            matching_meanings = [m for m in meanings if m.get("partOfSpeech") == requested_pos]
-            if matching_meanings:
-                meaning = matching_meanings[0]
-            else:
-                print(f"⚠️ Визначення для частини мови '{requested_pos}' не знайдено.")
-                return None
-        else:
-            meaning = meanings[0] if meanings else None
-            
-        if not meaning:
-            return None
-            
-        definitions = meaning.get("definitions", [])
-        if not definitions:
-            return None
-            
-        # Get thesaurus data
-        thes_data = fetch_thesaurus_data(word, requested_pos)
-            
-        return {
-            "definition": definitions[0].get("definition", ""),
-            "example": definitions[0].get("example", ""),
-            "synonyms": format_word_list(thes_data["synonyms"]),
-            "antonyms": format_word_list(thes_data["antonyms"]),
-            "related": format_word_list(thes_data["related"]),
-            "similar": format_word_list(thes_data["similar"]),
-            "partOfSpeech": meaning.get("partOfSpeech", ""),
-            "dictionary_entry": dictionary_entry  # This now contains the full dictionary entry
-        }
-        
-    except Exception as e:
-        print(f"❌ Виняток при отриманні даних зі словника: {e}")
-        return None
-
 # == Deck get/creation ==
 deck_name = "Default"
 deck_name = get_deck_name()
@@ -571,8 +484,8 @@ if not pos:
     pos = detected_pos
 
 # Get dictionary data with POS
-data = fetch_dictionary_data(word, pos)
-if not data:
+dictionary_data = fetch_word_data(word, pos)
+if not dictionary_data:
     exit(1)
 
 # == Highlight a word in a sentence ==
@@ -672,6 +585,9 @@ else:
 print("\n📝 Введіть український переклад:")
 translation_ua = input("🔤 Введіть слова перекладу (розділяйте комами): ").strip()
 
+# Format the full dictionary entry for the card
+dictionary_entry = format_dictionary_entry(dictionary_data["dictionary_api_response"])
+
 # == Формування картки ==
 note = {
     "deckName": deck_name,
@@ -681,17 +597,17 @@ note = {
         "Front": "",
         "Back": "",
         "Image": f'<div style="width: 250px; height: 250px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;"><img src="{image_url}" style="width: 100%; height: 100%; object-fit: contain;"></div>' if image_url else "",
-        "Definition": data["definition"],
-        "Synonyms": data["synonyms"],
-        "Antonyms": data["antonyms"],
-        "Related": data["related"],
-        "Similar": data["similar"],
+        "Definition": dictionary_data["definition"],
+        "Synonyms": dictionary_data["synonyms"],
+        "Antonyms": dictionary_data["antonyms"],
+        "Related": dictionary_data["related"],
+        "Similar": dictionary_data["similar"],
         "Sentence": highlighted,
         "Sentence_Repeated": sentence,
         "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
         "Word_Audio": word_audio_ref,
         "Irregular_Forms": irregular_forms_field,
-        "Dictionary_Entry": data["dictionary_entry"],
+        "Dictionary_Entry": dictionary_entry,
         "Translation_UA": translation_ua,
         "Tags": ""
     },
