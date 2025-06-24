@@ -1,3 +1,5 @@
+"""A service for fetching and consolidating data from dictionary and thesaurus APIs."""
+
 import os
 from src.utils.api_client import get_api_data
 

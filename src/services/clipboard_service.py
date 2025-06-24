@@ -1,3 +1,5 @@
+"""A service for retrieving and cleaning text from the system clipboard."""
+
 import pyperclip
 import re
 import sys
@@ -21,9 +23,9 @@ def get_clean_sentence_from_clipboard():
         # Replace multiple spaces with one
         sentence = re.sub(r'\s{2,}', ' ', sentence)
         # Replace curly double quotes with straight quotes
-        sentence = sentence.replace('“', '"').replace('”', '"')
+        sentence = sentence.replace('"', '"').replace('"', '"')
         # Replace curly single quotes with straight quotes
-        sentence = sentence.replace('‘', "'").replace('’', "'")
+        sentence = sentence.replace("'", "'").replace("'", "'")
         # Replace middle dot with dash
         sentence = sentence.replace('∙', '-')
         # Remove carriage returns

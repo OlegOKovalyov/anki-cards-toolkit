@@ -1,3 +1,5 @@
+"""A service for fetching images from the Pexels API."""
+
 import os
 from src.utils.api_client import get_api_data
 
