@@ -28,6 +28,8 @@ from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
 from src.services.pexels_api import fetch_pexels_images
 from src.services.dictionary_service import fetch_word_data
+from src.services.tts_service import generate_tts_base64
+from src.services.media_service import send_media_file
 
 # Load .env file
 load_dotenv()
@@ -507,64 +509,17 @@ else:
     image_url = ""
 
 # == Генерація озвучки (mp3 в base64) ==
-def generate_tts_base64(text):
-    try:
-        tts = gTTS(text)
-        buffer = BytesIO()
-        tts.write_to_fp(buffer)
-        buffer.seek(0)
-        encoded = base64.b64encode(buffer.read()).decode('utf-8')
-        return f"[sound:tts_{word}.mp3]", encoded
-    except requests.exceptions.ConnectionError:
-        print("\n❌ Помилка: Не вдалося підключитися до сервісу TTS. Перевірте підключення до інтернету.")
-        return None, None
-    except Exception as e:
-        print(f"\n❌ Помилка при генерації TTS: {str(e)}")
-        return None, None
-
-word_audio_ref, word_audio_data = generate_tts_base64(word)
+word_audio_ref, word_audio_data = generate_tts_base64(word, word)
 if word_audio_ref is None or word_audio_data is None:
     print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
     exit(0)
 
-sentence_audio_ref, sentence_audio_data = generate_tts_base64(sentence)
+sentence_audio_ref, sentence_audio_data = generate_tts_base64(sentence, f"sentence_{word}")
 if sentence_audio_ref is None or sentence_audio_data is None:
     print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
     exit(0)
 
 # == Додавання мультимедійних файлів до Anki ==
-def send_media_file(name, b64_data):
-    """Send media file to Anki with error handling"""
-    try:
-        result = requests.post("http://localhost:8765", json={
-            "action": "storeMediaFile",
-            "version": 6,
-            "params": {
-                "filename": name,
-                "data": b64_data
-            }
-        }, timeout=5).json()
-        
-        if result.get("error"):
-            print(f"⚠️ Помилка додавання {name}: {result['error']}")
-            return False
-        else:
-            print(f"📁 Файл {name} збережено")
-            return True
-            
-    except requests.exceptions.ConnectionError:
-        print(f"⚠️ Не вдалося зберегти {name}: немає зʼєднання з Anki")
-        return False
-    except requests.exceptions.Timeout:
-        print(f"⚠️ Не вдалося зберегти {name}: перевищено час очікування")
-        return False
-    except requests.exceptions.RequestException as e:
-        print(f"⚠️ Помилка запиту при збереженні {name}: {str(e)}")
-        return False
-    except Exception as e:
-        print(f"⚠️ Неочікувана помилка при збереженні {name}: {str(e)}")
-        return False
-
 # Before sending files to Anki, check connection
 # anki_available = True  # Already checked at the start, so always True
 
@@ -604,7 +559,7 @@ note = {
         "Similar": dictionary_data["similar"],
         "Sentence": highlighted,
         "Sentence_Repeated": sentence,
-        "Sentence_Audio": "[sound:tts_sentence_{0}.mp3]".format(word) if sentence_audio_data else "",
+        "Sentence_Audio": sentence_audio_ref,
         "Word_Audio": word_audio_ref,
         "Irregular_Forms": irregular_forms_field,
         "Dictionary_Entry": dictionary_entry,
