@@ -30,6 +30,7 @@ from src.services.pexels_api import fetch_pexels_images
 from src.services.dictionary_service import fetch_word_data
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
+from src.ui.image_selector import create_image_selection_page, select_image
 
 # Load .env file
 load_dotenv()
@@ -68,29 +69,6 @@ def check_anki_connect():
         sys.exit(1)
 
 check_anki_connect()
-
-def create_image_selection_page(images, word):
-    """Create HTML page for image selection"""
-    # Read the template file
-    template_path = os.path.join(os.path.dirname(__file__), 'templates', 'image_selection.html')
-    with open(template_path, 'r', encoding='utf-8') as f:
-        template = f.read()
-    
-    # Generate the image grid HTML
-    image_grid_html = ""
-    for i, photo in enumerate(images, 1):
-        image_grid_html += f"""
-            <div class="image-container">
-                <img src="{photo['src']['medium']}" alt="Image {i}">
-                <div class="image-number">{i}</div>
-            </div>
-        """
-    
-    # Replace placeholders in the template
-    html = template.replace('{{word}}', word)
-    html = html.replace('{{image_grid}}', image_grid_html)
-    
-    return html
 
 def load_last_deck():
     if os.path.exists(CONFIG_FILE):
@@ -169,36 +147,6 @@ def get_char():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
-
-def select_image(images, word):
-    """Interactive image selection interface with visual preview"""
-    if not images:
-        print(IMAGE_SELECTION_ERRORS['no_images'])
-        return None
-    
-    # Create and open selection page
-    html_content = create_image_selection_page(images, word)
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
-        f.write(html_content)
-        gallery_path = f.name
-    webbrowser.open('file://' + os.path.abspath(gallery_path))
-    
-    while True:
-        try:
-            choice = input("\n🔢 Введіть номер зображення (1-16) або натисніть Enter для пропуску: ").strip()
-            
-            if not choice:  # Skip image selection
-                os.unlink(gallery_path)
-                return None
-                
-            choice = int(choice)
-            if 1 <= choice <= len(images):
-                os.unlink(gallery_path)
-                return images[choice - 1]['src']['medium']
-            else:
-                print(IMAGE_SELECTION_ERRORS['invalid_number'].format(max=len(images)))
-        except ValueError:
-            print(IMAGE_SELECTION_ERRORS['invalid_input'])
 
 def fetch_thesaurus_data(word, pos=None):
     """
@@ -474,7 +422,6 @@ create_deck_if_not_exists(deck_name)
 # == Read the sentence from the buffer and clear it ==
 # (No need to check Anki connection here anymore)
 sentence = get_clean_sentence_from_clipboard()
-print(f"\n📋 Скопійоване речення:\n{sentence}\n")
 
 # == Word query ==
 word = input("🔤 Введи слово, яке хочеш вивчати: ").strip().lower()
