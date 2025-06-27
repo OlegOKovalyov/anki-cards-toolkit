@@ -29,6 +29,7 @@ from src.services.dictionary_service import fetch_word_data
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
 from src.ui.image_selector import create_image_selection_page, select_image
+from src.services.anki_service import check_anki_connect
 
 # Load .env file
 load_dotenv()
@@ -50,21 +51,6 @@ ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
 
 # Path to the file where the name of the last used deck will be stored
 CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
-
-# == Check Anki connection before anything else ==
-def check_anki_connect():
-    """Check if AnkiConnect is available. If not, print instructions and exit immediately."""
-    try:
-        response = requests.get("http://localhost:8765")
-        return True
-    except requests.exceptions.ConnectionError:
-        print("\n❌ Помилка: Не вдалося підключитися до Anki.")
-        print("Будь ласка, запустіть Anki та спробуйте ще раз.")
-        print("📝 Переконайтеся, що:")
-        print("   1. Anki запущено")
-        print("   2. Встановлено додаток AnkiConnect")
-        print("   3. AnkiConnect налаштовано на порт 8765")
-        sys.exit(1)
 
 check_anki_connect()
 
