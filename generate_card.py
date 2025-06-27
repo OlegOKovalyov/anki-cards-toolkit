@@ -4,8 +4,6 @@ import re
 from gtts import gTTS
 import base64
 from io import BytesIO
-import termios
-import tty
 import os
 import sys
 import webbrowser
@@ -136,17 +134,6 @@ def load_cefr_frequency_data():
 
 # Load CEFR and frequency data at startup
 CEFR_FREQUENCY_DATA = load_cefr_frequency_data()
-
-def get_char():
-    """Get a single character from standard input"""
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
 
 def format_dictionary_entry(data):
     """
