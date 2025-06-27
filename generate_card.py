@@ -30,6 +30,7 @@ from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
 from src.ui.image_selector import create_image_selection_page, select_image
 from src.services.anki_service import check_anki_connect
+from src.services.deck_service import load_last_deck, save_last_deck, get_deck_name, create_deck_if_not_exists
 
 # Load .env file
 load_dotenv()
@@ -53,51 +54,6 @@ ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
 CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
 
 check_anki_connect()
-
-def load_last_deck():
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, "r") as f:
-            return f.read().strip()
-    return "Default"
-
-def save_last_deck(deck_name):
-    with open(CONFIG_FILE, "w") as f:
-        f.write(deck_name.strip())
-
-def get_deck_name():
-    last_deck = load_last_deck()
-    user_input = input(f"Введіть назву колоди [{last_deck}]: ").strip()
-    deck = user_input if user_input else last_deck
-    save_last_deck(deck)
-    return deck
-
-def create_deck_if_not_exists(deck_name):
-    """Create a new deck in Anki if it doesn't exist"""
-    payload = {
-        "action": "createDeck",
-        "version": 6,
-        "params": {"deck": deck_name}
-    }
-    try:
-        response = requests.post(ANKI_CONNECT_URL, json=payload, timeout=5)
-        response.raise_for_status()  # Raise exception for bad status codes
-        result = response.json()
-        if result.get("error"):
-            print(f"⚠️ Помилка створення колоди: {result['error']}")
-            return False
-        return True
-    except requests.exceptions.ConnectionError:
-        # Do not print error here; already handled at startup
-        return False
-    except requests.exceptions.Timeout:
-        print("❌ Перевищено час очікування відповіді від Anki")
-        return False
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Помилка запиту до Anki: {str(e)}")
-        return False
-    except Exception as e:
-        print(f"❌ Неочікувана помилка при створенні колоди: {str(e)}")
-        return False
 
 def load_cefr_frequency_data():
     """Load CEFR and frequency data from CSV file"""
