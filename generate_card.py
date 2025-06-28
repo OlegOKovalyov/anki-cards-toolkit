@@ -29,7 +29,7 @@ from src.services.dictionary_service import fetch_word_data
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
 from src.ui.image_selector import create_image_selection_page, select_image
-from src.services.anki_service import check_anki_connect
+from src.services.anki_service import check_anki_connect, add_note
 from src.services.deck_service import load_last_deck, save_last_deck, get_deck_name, create_deck_if_not_exists
 
 # Load .env file
@@ -359,18 +359,7 @@ note = {
 }
 
 try:
-    result = requests.post("http://localhost:8765", json={
-        "action": "addNote",
-        "version": 6,
-        "params": {"note": note}
-    }, timeout=5).json()
-
-    if result.get("error") is None:
-        print(f"✅ Картку додано: ID = {result['result']}")
-    else:
-        print(f"❌ Помилка додавання картки: {result['error']}")
-        
-except requests.exceptions.ConnectionError:
-    print("❌ Не вдалося додати картку: немає зʼєднання з Anki")
+    result = add_note(note)
+    print(f"✅ Картку додано: ID = {result['result']}")
 except Exception as e:
-    print(f"❌ Помилка при додаванні картки: {str(e)}")
+    print(str(e))
