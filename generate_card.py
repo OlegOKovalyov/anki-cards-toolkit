@@ -21,6 +21,10 @@ from src.ui.image_selector import create_image_selection_page, select_image
 from src.services.anki_service import check_anki_connect, add_note
 from src.services.deck_service import get_deck_name, create_deck_if_not_exists
 
+# ============================================================================
+# STEP 1: INITIALIZATION & CONFIGURATION
+# ============================================================================
+
 # Load .env file
 load_dotenv()
 
@@ -42,34 +46,47 @@ ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
 # Path to the file where the name of the last used deck will be stored
 CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
 
+# ============================================================================
+# STEP 2: ANKI CONNECTION & DECK SETUP
+# ============================================================================
+
+# Verify Anki connection
 check_anki_connect()
 
-# == Deck get/creation ==
+# Setup deck for card creation
 deck_name = get_deck_name()
 create_deck_if_not_exists(deck_name)
 
-# == Read the sentence from the buffer and clear it ==
+# ============================================================================
+# STEP 3: USER INTERACTION & INPUT VALIDATION
+# ============================================================================
+
+# Get sentence from clipboard
 sentence = get_clean_sentence_from_clipboard()
 
-# == Word query ==
+# Get focus word from user
 word = input("🔤 Введи слово, яке хочеш вивчати: ").strip().lower()
 
-# Detect part of speech and show it in the prompt
+# Detect and confirm part of speech
 detected_pos = detect_pos_from_context(word, sentence) or "noun"
 pos = input(f"📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: ").strip().lower()
 if not pos:
     pos = detected_pos
 
-# Get dictionary data with POS
+# ============================================================================
+# STEP 4: DATA GATHERING & PROCESSING
+# ============================================================================
+
+# Fetch dictionary data with confirmed POS
 dictionary_data = fetch_word_data(word, pos)
 if not dictionary_data:
     exit(1)
 
-# == Highlight a word in a sentence ==
+# Highlight focus word in sentence
 pos_map = {'noun': 'n', 'verb': 'v', 'adjective': 'a', 'adverb': 'r'}
 highlighted = highlight_focus_word(sentence, word, pos=pos_map.get(pos, 'n'))
 
-# == Image Selection ==
+# Fetch and select image
 print("\n🔍 Пошук відповідних зображень...")
 images = fetch_pexels_images(word)
 if images:
@@ -83,7 +100,7 @@ else:
     print("⚠️ Зображень не знайдено. Продовжую без зображення.")
     image_url = ""
 
-# == Генерація озвучки (mp3 в base64) ==
+# Generate audio files
 word_audio_ref, word_audio_data = generate_tts_base64(word, word)
 if word_audio_ref is None or word_audio_data is None:
     print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
@@ -94,28 +111,36 @@ if sentence_audio_ref is None or sentence_audio_data is None:
     print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
     exit(0)
 
-# == Додавання мультимедійних файлів до Anki ==
-if word_audio_data:
-    send_media_file(f"tts_{word}.mp3", word_audio_data)
-
-if sentence_audio_data:
-    send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
-
-# == Отримуємо всі форми неправильного дієслова ==
+# Get irregular verb forms
 forms = get_irregular_forms(word)
 if forms:
     irregular_forms_field = " - ".join(forms)  # Наприклад, "flee - fled - fled"
 else:
     irregular_forms_field = ""
 
-# == Запит українського перекладу ==
+# Get Ukrainian translation
 print("\n📝 Введіть український переклад:")
 translation_ua = input("🔤 Введіть слова перекладу (розділяйте комами): ").strip()
 
-# Format the full dictionary entry for the card
+# Format full dictionary entry
 dictionary_entry = format_dictionary_entry(dictionary_data["dictionary_api_response"])
 
-# == Формування картки ==
+# ============================================================================
+# STEP 5: MEDIA FILE UPLOAD
+# ============================================================================
+
+# Upload audio files to Anki
+if word_audio_data:
+    send_media_file(f"tts_{word}.mp3", word_audio_data)
+
+if sentence_audio_data:
+    send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
+
+# ============================================================================
+# STEP 6: CARD CONSTRUCTION & SUBMISSION
+# ============================================================================
+
+# Build note structure
 note = {
     "deckName": deck_name,
     "modelName": MODEL_NAME,
@@ -144,6 +169,7 @@ note = {
     "tags": []
 }
 
+# Submit card to Anki
 try:
     result = add_note(note)
     print(f"✅ Картку додано: ID = {result['result']}")
