@@ -1,15 +1,5 @@
-import requests
-import pyperclip
-import re
-from gtts import gTTS
-import base64
-from io import BytesIO
 import os
 import sys
-import webbrowser
-import tempfile
-import csv
-from nltk.stem import WordNetLemmatizer
 from dotenv import load_dotenv
 from docs.error_messages import (
     PEXELS_API_ERRORS,
@@ -20,7 +10,6 @@ from docs.error_messages import (
     GENERAL_ERRORS,
     SUCCESS_MESSAGES
 )
-from data.irregular_verbs import irregular_verbs
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
@@ -30,7 +19,7 @@ from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
 from src.ui.image_selector import create_image_selection_page, select_image
 from src.services.anki_service import check_anki_connect, add_note
-from src.services.deck_service import load_last_deck, save_last_deck, get_deck_name, create_deck_if_not_exists
+from src.services.deck_service import get_deck_name, create_deck_if_not_exists
 
 # Load .env file
 load_dotenv()
@@ -56,12 +45,10 @@ CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
 check_anki_connect()
 
 # == Deck get/creation ==
-deck_name = "Default"
 deck_name = get_deck_name()
 create_deck_if_not_exists(deck_name)
 
 # == Read the sentence from the buffer and clear it ==
-# (No need to check Anki connection here anymore)
 sentence = get_clean_sentence_from_clipboard()
 
 # == Word query ==
@@ -108,9 +95,6 @@ if sentence_audio_ref is None or sentence_audio_data is None:
     exit(0)
 
 # == Додавання мультимедійних файлів до Anki ==
-# Before sending files to Anki, check connection
-# anki_available = True  # Already checked at the start, so always True
-
 if word_audio_data:
     send_media_file(f"tts_{word}.mp3", word_audio_data)
 
