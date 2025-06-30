@@ -20,6 +20,7 @@ from src.services.media_service import send_media_file
 from src.ui.image_selector import create_image_selection_page, select_image
 from src.services.anki_service import check_anki_connect, add_note
 from src.services.deck_service import get_deck_name, create_deck_if_not_exists
+from src.utils.validation import validate_config
 
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
@@ -168,6 +169,22 @@ note = {
     },
     "tags": []
 }
+
+# Assemble config for validation
+config = {
+    "deck_name": deck_name,
+    "model_name": MODEL_NAME,
+    "pexels_api_key": PEXELS_API_KEY,
+    "big_huge_api_key": BIG_HUGE_API_KEY,
+    "anki_connect_url": ANKI_CONNECT_URL,
+    "config_file": CONFIG_FILE,
+}
+
+try:
+    validate_config(config)
+except ValueError as e:
+    print(f"\n❌ Configuration error: {e}")
+    sys.exit(1)
 
 # Submit card to Anki
 try:
