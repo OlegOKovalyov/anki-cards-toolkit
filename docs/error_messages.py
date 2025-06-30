@@ -74,12 +74,12 @@ SUCCESS_MESSAGES = {
 
 DECK_NAME_MISSING = "Deck name is missing. Please provide a deck name in your configuration."
 DECK_NAME_INVALID_WHITESPACE = "Deck name cannot be empty or contain only whitespace."
-DECK_NAME_INVALID_CHARACTERS = "Deck name contains forbidden characters. Please avoid using /, \\, :, *, ?, \", <, >, |."
+DECK_NAME_INVALID_CHARACTERS = "Deck name contains forbidden characters. Please avoid using /, \\, *, ?, \", <, >, |."
 
 CONFIG_ERRORS = {
     'deck_name_missing': "Deck name is missing. Please provide a deck name in your configuration.",
     'deck_name_invalid_whitespace': "Deck name cannot be empty or contain only whitespace.",
-    'deck_name_invalid_characters': "Deck name contains forbidden characters. Please avoid using /, \\, :, *, ?, \", <, >, |.",
+    'deck_name_invalid_characters': "Deck name contains forbidden characters. Please avoid using /, \\, *, ?, \", <, >, |.",
     'model_name_invalid': "Model name must be exactly 'VocabCard_English_UA'.",
     'pexels_api_key_invalid': "PEXELS_API_KEY must be exactly 56 characters long and contain no spaces.",
     'big_huge_api_key_invalid': "BIG_HUGE_API_KEY must be exactly 32 characters long and contain no spaces.",

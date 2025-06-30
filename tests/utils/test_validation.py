@@ -42,7 +42,7 @@ def test_validate_config_whitespace_deck_name():
     with pytest.raises(ValueError, match=CONFIG_ERRORS['deck_name_invalid_whitespace']):
         validate_config(config)
 
-@pytest.mark.parametrize("char", ['/', '\\', ':', '*', '?', '"', '<', '>', '|'])
+@pytest.mark.parametrize("char", ['/', '\\', '*', '?', '"', '<', '>', '|'])
 def test_validate_config_forbidden_characters(char):
     config = valid_config()
     config["deck_name"] = f"My Deck{char}Name"

@@ -10,7 +10,7 @@ def validate_config(config: Dict[str, Any]) -> None:
         raise ValueError(CONFIG_ERRORS['deck_name_missing'])
     if not isinstance(deck_name, str) or not deck_name.strip():
         raise ValueError(CONFIG_ERRORS['deck_name_invalid_whitespace'])
-    forbidden_chars = r'\/\\:*?"<>|'
+    forbidden_chars = r'\/\\*?"<>|'
     if any(char in deck_name for char in forbidden_chars):
         raise ValueError(CONFIG_ERRORS['deck_name_invalid_characters'])
 
