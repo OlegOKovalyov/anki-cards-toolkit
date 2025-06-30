@@ -70,4 +70,8 @@ SUCCESS_MESSAGES = {
     'images_found': "✅ Знайдено {count} зображень",
     'image_selected': "✅ Зображення успішно вибрано",
     'thesaurus_data': "✅ Отримано відповідь від Big Huge Thesaurus"
-} 
+}
+
+DECK_NAME_MISSING = "Deck name is missing. Please provide a deck name in your configuration."
+DECK_NAME_INVALID_WHITESPACE = "Deck name cannot be empty or contain only whitespace."
+DECK_NAME_INVALID_CHARACTERS = "Deck name contains forbidden characters. Please avoid using /, \\, :, *, ?, \", <, >, |." 
