@@ -1,6 +1,7 @@
 import os
 import sys
 from dotenv import load_dotenv
+from src.utils.config_builder import config_build, get_default_deck_name
 from docs.error_messages import (
     PEXELS_API_ERRORS,
     ANKI_ERRORS,
@@ -23,7 +24,7 @@ from src.services.dictionary_service import (
 )
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
-from src.ui.image_selector import create_image_selection_page, select_image
+from src.ui.image_selector import create_image_selection_page, select_image, select_image_for_card
 from src.services.anki_service import check_anki_connect, add_note
 from src.services.deck_service import get_deck_name, create_deck_if_not_exists, load_last_deck
 from src.utils.validation import validate_config
@@ -33,43 +34,13 @@ from src.utils.validation import validate_config
 # ============================================================================
 
 # Load .env file
-load_dotenv()
-
-# == Configuration from .env ==
-# MODEL_NAME refers to the name of the Note Type in Anki.
-# To check or change it in Anki: open Anki → Tools → Manage Note Types.
-# Your note type should be  named as VocabCard_English_UA
-MODEL_NAME = os.getenv("MODEL_NAME")
-
-# DECK_NAME is the name of the Anki deck where the new cards will be added.
-# You can create or check deck names via Anki: open Anki → Decks → Add.
-# The initial deck name will be Default
-DECK_NAME = os.getenv("DECK_NAME")
-
-PEXELS_API_KEY = os.getenv("PEXELS_API_KEY") # API key for Pexels
-BIG_HUGE_API_KEY = os.getenv("BIG_HUGE_API_KEY") # API key for Big Huge Thesaurus
-ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
-
-# Path to the file where the name of the last used deck will be stored
-CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
-
-# Read deck name from last_deck.txt or .env, but do NOT prompt the user before validation
-default_deck_name = None
-if os.path.exists(CONFIG_FILE):
-    with open(CONFIG_FILE, "r") as f:
-        default_deck_name = f.read().strip()
-if not default_deck_name:
-    default_deck_name = os.getenv("DECK_NAME") or "Default"
+load_dotenv(override=True)
 
 # ===== STRICT EARLY CONFIG VALIDATION (no user prompt, no data loading) =====
-config = {
-    "deck_name": default_deck_name,
-    "model_name": MODEL_NAME,
-    "pexels_api_key": PEXELS_API_KEY,
-    "big_huge_api_key": BIG_HUGE_API_KEY,
-    "anki_connect_url": ANKI_CONNECT_URL,
-    "config_file": CONFIG_FILE,
-}
+config = config_build()
+
+# Read deck name from last_deck.txt or .env, but do NOT prompt the user before validation
+default_deck_name = get_default_deck_name(config)
 
 try:
     validate_config(config)
@@ -125,18 +96,7 @@ pos_map = {'noun': 'n', 'verb': 'v', 'adjective': 'a', 'adverb': 'r'}
 highlighted = highlight_focus_word(sentence, word, pos=pos_map.get(pos, 'n'))
 
 # Fetch and select image
-print("\n🔍 Пошук відповідних зображень...")
-images = fetch_pexels_images(word)
-if images:
-    print(f"Знайдено {len(images)} зображень. Відкриваю попередній перегляд у браузері...")
-    image_url = select_image(images, word)
-    if image_url:
-        print("✅ Зображення успішно вибрано.")
-    else:
-        print("⚠️ Зображення не вибрано. Продовжую без зображення.")
-else:
-    print("⚠️ Зображень не знайдено. Продовжую без зображення.")
-    image_url = ""
+image_url = select_image_for_card(word)
 
 # Generate audio files
 word_audio_ref, word_audio_data = generate_tts_base64(word, word)
@@ -181,7 +141,7 @@ if sentence_audio_data:
 # Build note structure
 note = {
     "deckName": deck_name,
-    "modelName": MODEL_NAME,
+    "modelName": config["model_name"],
     "fields": {
         "Word": word,
         "Front": "",
