@@ -141,13 +141,13 @@ else:
 # Generate audio files
 word_audio_ref, word_audio_data = generate_tts_base64(word, word)
 if word_audio_ref is None or word_audio_data is None:
-    print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
-    exit(0)
+    print(TTS_ERRORS["skip_card"])
+    sys.exit(1)
 
 sentence_audio_ref, sentence_audio_data = generate_tts_base64(sentence, f"sentence_{word}")
 if sentence_audio_ref is None or sentence_audio_data is None:
-    print("ℹ️ Пропускаємо створення картки через помилку TTS. Спробуйте наступне речення.")
-    exit(0)
+    print(TTS_ERRORS["skip_card"])
+    sys.exit(1)
 
 # Get irregular verb forms
 forms = get_irregular_forms(word)
