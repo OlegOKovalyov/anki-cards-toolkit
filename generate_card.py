@@ -8,18 +8,24 @@ from docs.error_messages import (
     DICTIONARY_ERRORS,
     IMAGE_SELECTION_ERRORS,
     GENERAL_ERRORS,
-    SUCCESS_MESSAGES
+    SUCCESS_MESSAGES,
+    CONFIG_ERRORS
 )
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
 from src.services.pexels_api import fetch_pexels_images
-from src.services.dictionary_service import fetch_word_data, format_dictionary_entry, format_word_list
+from src.services.dictionary_service import (
+    fetch_word_data,
+    format_dictionary_entry,
+    format_word_list,
+    load_cefr_frequency_data
+)
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
 from src.ui.image_selector import create_image_selection_page, select_image
 from src.services.anki_service import check_anki_connect, add_note
-from src.services.deck_service import get_deck_name, create_deck_if_not_exists
+from src.services.deck_service import get_deck_name, create_deck_if_not_exists, load_last_deck
 from src.utils.validation import validate_config
 
 # ============================================================================
@@ -47,20 +53,48 @@ ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") # URL of the AnkiConnect server
 # Path to the file where the name of the last used deck will be stored
 CONFIG_FILE = os.getenv("CONFIG_FILE") # last_deck.txt
 
-# ============================================================================
-# STEP 2: ANKI CONNECTION & DECK SETUP
-# ============================================================================
+# Read deck name from last_deck.txt or .env, but do NOT prompt the user before validation
+default_deck_name = None
+if os.path.exists(CONFIG_FILE):
+    with open(CONFIG_FILE, "r") as f:
+        default_deck_name = f.read().strip()
+if not default_deck_name:
+    default_deck_name = os.getenv("DECK_NAME") or "Default"
 
-# Verify Anki connection
-check_anki_connect()
+# ===== STRICT EARLY CONFIG VALIDATION (no user prompt, no data loading) =====
+config = {
+    "deck_name": default_deck_name,
+    "model_name": MODEL_NAME,
+    "pexels_api_key": PEXELS_API_KEY,
+    "big_huge_api_key": BIG_HUGE_API_KEY,
+    "anki_connect_url": ANKI_CONNECT_URL,
+    "config_file": CONFIG_FILE,
+}
 
-# Setup deck for card creation
+try:
+    validate_config(config)
+except ValueError as e:
+    print(f"\n❌ Config error: {e}")
+    print("Please fix the configuration and try again.")
+    sys.exit(1)
+
+# =========================================================================
+# STEP 2: ANKI CONNECTION CHECK (no user prompt, no data loading)
+# =========================================================================
+try:
+    check_anki_connect()
+except Exception as e:
+    print(ANKI_ERRORS['connection'])
+    print(ANKI_ERRORS['setup_instructions'])
+    sys.exit(1)
+
+# =========================================================================
+# STEP 3: USER INTERACTION & INPUT VALIDATION
+# =========================================================================
+
+# Now prompt the user for the deck name (if needed)
 deck_name = get_deck_name()
 create_deck_if_not_exists(deck_name)
-
-# ============================================================================
-# STEP 3: USER INTERACTION & INPUT VALIDATION
-# ============================================================================
 
 # Get sentence from clipboard
 sentence = get_clean_sentence_from_clipboard()
@@ -77,6 +111,9 @@ if not pos:
 # ============================================================================
 # STEP 4: DATA GATHERING & PROCESSING
 # ============================================================================
+
+# Load CEFR/frequency data for 172782 words
+load_cefr_frequency_data()
 
 # Fetch dictionary data with confirmed POS
 dictionary_data = fetch_word_data(word, pos)
@@ -169,22 +206,6 @@ note = {
     },
     "tags": []
 }
-
-# Assemble config for validation
-config = {
-    "deck_name": deck_name,
-    "model_name": MODEL_NAME,
-    "pexels_api_key": PEXELS_API_KEY,
-    "big_huge_api_key": BIG_HUGE_API_KEY,
-    "anki_connect_url": ANKI_CONNECT_URL,
-    "config_file": CONFIG_FILE,
-}
-
-try:
-    validate_config(config)
-except ValueError as e:
-    print(f"\n❌ Configuration error: {e}")
-    sys.exit(1)
 
 # Submit card to Anki
 try:

@@ -30,9 +30,6 @@ def load_cefr_frequency_data():
         CEFR_FREQUENCY_DATA.clear()
         return {}
 
-# Load CEFR data automatically when module is imported
-load_cefr_frequency_data()
-
 def format_dictionary_entry(data):
     """
     Format dictionary data into a clean HTML structure for Anki card with dark theme styling.
