@@ -1,16 +1,9 @@
-import os
 import sys
 from dotenv import load_dotenv
 from src.utils.config_builder import config_build, get_default_deck_name
 from docs.error_messages import (
-    PEXELS_API_ERRORS,
     ANKI_ERRORS,
-    TTS_ERRORS,
-    DICTIONARY_ERRORS,
-    IMAGE_SELECTION_ERRORS,
-    GENERAL_ERRORS,
-    SUCCESS_MESSAGES,
-    CONFIG_ERRORS
+    TTS_ERRORS
 )
 from docs.user_messages import (
     INITIALIZATION_CONFIGURATION,
@@ -22,18 +15,16 @@ from docs.user_messages import (
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
-from src.services.pexels_api import fetch_pexels_images
 from src.services.dictionary_service import (
     fetch_word_data,
     format_dictionary_entry,
-    format_word_list,
     load_cefr_frequency_data
 )
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
-from src.ui.image_selector import create_image_selection_page, select_image, select_image_for_card
+from src.ui.image_selector import select_image_for_card
 from src.services.anki_service import check_anki_connect, add_note
-from src.services.deck_service import get_deck_name, create_deck_if_not_exists, load_last_deck
+from src.services.deck_service import get_deck_name, create_deck_if_not_exists
 from src.utils.validation import validate_config
 from src.utils.note_builder import build_anki_note
 
