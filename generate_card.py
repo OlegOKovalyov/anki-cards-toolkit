@@ -28,6 +28,7 @@ from src.ui.image_selector import create_image_selection_page, select_image, sel
 from src.services.anki_service import check_anki_connect, add_note
 from src.services.deck_service import get_deck_name, create_deck_if_not_exists, load_last_deck
 from src.utils.validation import validate_config
+from src.utils.note_builder import build_anki_note
 
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
@@ -139,33 +140,20 @@ if sentence_audio_data:
 # ============================================================================
 
 # Build note structure
-note = {
-    "deckName": deck_name,
-    "modelName": config["model_name"],
-    "fields": {
-        "Word": word,
-        "Front": "",
-        "Back": "",
-        "Image": f'<div style="width: 250px; height: 250px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;"><img src="{image_url}" style="width: 100%; height: 100%; object-fit: contain;"></div>' if image_url else "",
-        "Definition": dictionary_data["definition"],
-        "Synonyms": dictionary_data["synonyms"],
-        "Antonyms": dictionary_data["antonyms"],
-        "Related": dictionary_data["related"],
-        "Similar": dictionary_data["similar"],
-        "Sentence": highlighted,
-        "Sentence_Repeated": sentence,
-        "Sentence_Audio": sentence_audio_ref,
-        "Word_Audio": word_audio_ref,
-        "Irregular_Forms": irregular_forms_field,
-        "Dictionary_Entry": dictionary_entry,
-        "Translation_UA": translation_ua,
-        "Tags": ""
-    },
-    "options": {
-        "allowDuplicate": False
-    },
-    "tags": []
-}
+note = build_anki_note(
+    word=word,
+    sentence=sentence,
+    highlighted=highlighted,
+    image_url=image_url,
+    dictionary_data=dictionary_data,
+    sentence_audio_ref=sentence_audio_ref,
+    word_audio_ref=word_audio_ref,
+    irregular_forms_field=irregular_forms_field,
+    dictionary_entry=dictionary_entry,
+    translation_ua=translation_ua,
+    config=config,
+    deck_name=deck_name
+)
 
 # Submit card to Anki
 try:
