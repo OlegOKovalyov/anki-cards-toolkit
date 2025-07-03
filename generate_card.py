@@ -12,6 +12,13 @@ from docs.error_messages import (
     SUCCESS_MESSAGES,
     CONFIG_ERRORS
 )
+from docs.user_messages import (
+    INITIALIZATION_CONFIGURATION,
+    USER_INTERACTION_INPUT_VALIDATION,
+    DATA_GATHERING_PROCESSING,
+    MEDIA_FILE_UPLOAD,
+    CARD_CONSTRUCTION_SUBMISSION
+)
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
@@ -46,8 +53,8 @@ default_deck_name = get_default_deck_name(config)
 try:
     validate_config(config)
 except ValueError as e:
-    print(f"\n❌ Config error: {e}")
-    print("Please fix the configuration and try again.")
+    print(INITIALIZATION_CONFIGURATION["config_error"].format(error=e))
+    print(INITIALIZATION_CONFIGURATION["config_fix"])
     sys.exit(1)
 
 # =========================================================================
@@ -72,11 +79,11 @@ create_deck_if_not_exists(deck_name)
 sentence = get_clean_sentence_from_clipboard()
 
 # Get focus word from user
-word = input("🔤 Введи слово, яке хочеш вивчати: ").strip().lower()
+word = input(USER_INTERACTION_INPUT_VALIDATION["word_prompt"]).strip().lower()
 
 # Detect and confirm part of speech
 detected_pos = detect_pos_from_context(word, sentence) or "noun"
-pos = input(f"📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: ").strip().lower()
+pos = input(USER_INTERACTION_INPUT_VALIDATION["pos_prompt"].format(detected_pos=detected_pos)).strip().lower()
 if not pos:
     pos = detected_pos
 
@@ -118,8 +125,8 @@ else:
     irregular_forms_field = ""
 
 # Get Ukrainian translation
-print("\n📝 Введіть український переклад:")
-translation_ua = input("🔤 Введіть слова перекладу (розділяйте комами): ").strip()
+print(DATA_GATHERING_PROCESSING["translation_intro"])
+translation_ua = input(DATA_GATHERING_PROCESSING["translation_prompt"]).strip()
 
 # Format full dictionary entry
 dictionary_entry = format_dictionary_entry(dictionary_data["dictionary_api_response"])
@@ -158,6 +165,6 @@ note = build_anki_note(
 # Submit card to Anki
 try:
     result = add_note(note)
-    print(f"✅ Картку додано: ID = {result['result']}")
+    print(CARD_CONSTRUCTION_SUBMISSION["card_added"].format(card_id=result['result']))
 except Exception as e:
-    print(str(e))
+    print(CARD_CONSTRUCTION_SUBMISSION["exception"].format(error=str(e)))
