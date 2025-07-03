@@ -32,11 +32,19 @@ def load_cefr_frequency_data():
 
 def format_dictionary_entry(data):
     """
-    Format dictionary data into a clean HTML structure for Anki card with dark theme styling.
+    Format dictionary data (list of entries) into a clean HTML structure for Anki card with dark theme styling.
+    Accepts either a list (multi-entry) or a single dict (legacy/single-entry).
     """
     try:
+        # Backward compatibility: if a single dict is passed, wrap in a list
+        if isinstance(data, dict):
+            entries = [data]
+        elif isinstance(data, list):
+            entries = data
+        else:
+            return "Invalid dictionary data."
+
         html = []
-        
         # Add CSS styles
         html.append("""
 <style>
@@ -116,26 +124,27 @@ def format_dictionary_entry(data):
 }
 </style>
 """)
-        
+
         html.append('<div class="dictionary-entry">')
-        
-        # Add word, CEFR/frequency, and phonetics in header
-        word = data.get("word", "").lower()
-        phonetics = data.get("phonetics", [])
+
+        # Use the first entry for word and phonetic info
+        first_entry = entries[0] if entries else {}
+        word = first_entry.get("word", "").lower()
+        phonetics = first_entry.get("phonetics", [])
         phonetic_text = next((p.get("text", "") for p in phonetics if p.get("text")), "")
-        
+
         # Get CEFR and frequency data
         cefr_freq = CEFR_FREQUENCY_DATA.get(word, {})
         cefr = cefr_freq.get('cefr', '')
         freq = cefr_freq.get('frequency', '')
-        
+
         # Format CEFR and frequency info
         cefr_freq_text = ''
         if cefr and cefr != '?':
             cefr_freq_text = f'{cefr} ({freq})'
         elif freq:
             cefr_freq_text = f'({freq})'
-        
+
         html.append('<div class="word-header">')
         html.append('<div class="word-info">')
         if word:
@@ -146,58 +155,53 @@ def format_dictionary_entry(data):
         if cefr_freq_text:
             html.append(f'<span class="cefr-freq">{cefr_freq_text}</span>')
         html.append('</div>')
-        
-        # Process each meaning
-        meanings = data.get("meanings", [])
-        if not meanings:
+
+        # Group all meanings by partOfSpeech across all entries
+        pos_groups = {}
+        for entry in entries:
+            for meaning in entry.get("meanings", []):
+                pos = meaning.get("partOfSpeech", "")
+                if not pos:
+                    continue
+                if pos not in pos_groups:
+                    pos_groups[pos] = []
+                pos_groups[pos].append(meaning)
+
+        if not pos_groups:
             html.append('</div>')
             return "\n".join(html)
-        
-        for meaning in meanings:
-            pos = meaning.get("partOfSpeech", "")
-            definitions = meaning.get("definitions", [])
-            
-            if pos:
-                html.append(f'<div class="pos">{pos}</div>')
-            
-            if definitions:
-                for i, def_item in enumerate(definitions, 1):
+
+        # For each part of speech, aggregate definitions from all entries
+        for pos, meanings in pos_groups.items():
+            html.append(f'<div class="pos">{pos}</div>')
+            def_counter = 1
+            for meaning in meanings:
+                definitions = meaning.get("definitions", [])
+                for def_item in definitions:
                     html.append('<div class="definition-block">')
-                    
-                    # Definition
                     definition = def_item.get("definition", "")
                     if definition:
-                        html.append(f'<div class="definition"><strong>{i}.</strong> {definition}</div>')
-                    
-                    # Example
+                        html.append(f'<div class="definition"><strong>{def_counter}.</strong> {definition}</div>')
+                        def_counter += 1
                     example = def_item.get("example", "")
                     if example:
                         html.append(f'<div class="example">"{example}"</div>')
-                    
-                    # Definition-specific synonyms
                     def_synonyms = def_item.get("synonyms", [])
                     if def_synonyms:
                         html.append(f'<div class="word-relations synonyms">• Synonyms: {", ".join(def_synonyms)}</div>')
-                    
-                    # Definition-specific antonyms
                     def_antonyms = def_item.get("antonyms", [])
                     if def_antonyms:
                         html.append(f'<div class="word-relations antonyms">• Antonyms: {", ".join(def_antonyms)}</div>')
-                    
                     html.append('</div>')
-            
-            # Part of speech level synonyms/antonyms
-            pos_synonyms = meaning.get("synonyms", [])
-            pos_antonyms = meaning.get("antonyms", [])
-            
-            if pos_synonyms:
-                html.append(f'<div class="additional-relations synonyms">Additional synonyms: {", ".join(pos_synonyms)}</div>')
-            if pos_antonyms:
-                html.append(f'<div class="additional-relations antonyms">Additional antonyms: {", ".join(pos_antonyms)}</div>')
-        
+                # Part of speech level synonyms/antonyms
+                pos_synonyms = meaning.get("synonyms", [])
+                pos_antonyms = meaning.get("antonyms", [])
+                if pos_synonyms:
+                    html.append(f'<div class="additional-relations synonyms">Additional synonyms: {", ".join(pos_synonyms)}</div>')
+                if pos_antonyms:
+                    html.append(f'<div class="additional-relations antonyms">Additional antonyms: {", ".join(pos_antonyms)}</div>')
         html.append('</div>')
         return "\n".join(html)
-        
     except Exception as e:
         print(f"❌ Error formatting dictionary entry: {str(e)}")
         return "Error formatting dictionary entry."
@@ -206,7 +210,7 @@ def _fetch_dictionary_api_data(word: str):
     """Fetch raw word data from the DictionaryAPI."""
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     data = get_api_data(url)
-    return data[0] if data else None
+    return data if data else None
 
 def _fetch_thesaurus_api_data(word: str):
     """Fetch raw thesaurus data from Big Huge Thesaurus."""
@@ -270,22 +274,34 @@ def fetch_word_data(word: str, requested_pos: str = None):
     thesaurus_data = _fetch_thesaurus_api_data(word)
     processed_thesaurus = _process_thesaurus_data(thesaurus_data, requested_pos)
 
-    meanings = dictionary_data.get("meanings", [])
-    target_meaning = None
+    # Handle both list (multi-entry) and dict (legacy) for backward compatibility
+    if isinstance(dictionary_data, dict):
+        entries = [dictionary_data]
+    elif isinstance(dictionary_data, list):
+        entries = dictionary_data
+    else:
+        print("❌ Невірний формат даних словника.")
+        return None
 
+    # Aggregate all meanings from all entries
+    all_meanings = []
+    for entry in entries:
+        all_meanings.extend(entry.get("meanings", []))
+
+    target_meaning = None
     if requested_pos:
-        for m in meanings:
+        for m in all_meanings:
             if m.get("partOfSpeech") == requested_pos:
                 target_meaning = m
                 break
         if not target_meaning:
             print(f"⚠️ Визначення для '{requested_pos}' не знайдено. Використовується перше доступне.")
-            target_meaning = meanings[0] if meanings else {}
+            target_meaning = all_meanings[0] if all_meanings else {}
     else:
-        target_meaning = meanings[0] if meanings else {}
+        target_meaning = all_meanings[0] if all_meanings else {}
 
     definitions = target_meaning.get("definitions", [{}])
-    
+
     return {
         "definition": definitions[0].get("definition", ""),
         "example": definitions[0].get("example", ""),

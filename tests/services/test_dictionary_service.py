@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.services.dictionary_service import fetch_word_data
+from src.services.dictionary_service import fetch_word_data, format_dictionary_entry
 
 # Mock API responses
 mock_dict_response = {
@@ -72,3 +72,46 @@ def test_fetch_word_data_thesaurus_fails(mock_fetch_dict, mock_fetch_thes):
     assert result['partOfSpeech'] == 'noun'
     assert result['synonyms'] == "" # No synonyms should be found
     assert result['antonyms'] == "" 
+
+def test_format_dictionary_entry_multi_entry():
+    # Simulate two entries: noun and verb, with two noun entries
+    data = [
+        {
+            "word": "test",
+            "phonetics": [{"text": "/tɛst/"}],
+            "meanings": [
+                {
+                    "partOfSpeech": "noun",
+                    "definitions": [
+                        {"definition": "a procedure for critical evaluation", "example": "a test of skill"}
+                    ]
+                }
+            ]
+        },
+        {
+            "word": "test",
+            "phonetics": [],
+            "meanings": [
+                {
+                    "partOfSpeech": "noun",
+                    "definitions": [
+                        {"definition": "an event or situation that reveals the strength or quality of someone or something"}
+                    ]
+                },
+                {
+                    "partOfSpeech": "verb",
+                    "definitions": [
+                        {"definition": "take measures to check the quality", "example": "this is a test"}
+                    ]
+                }
+            ]
+        }
+    ]
+    html = format_dictionary_entry(data)
+    # Should include both noun definitions under one heading, and verb under another
+    assert html.count('<div class="pos">noun</div>') == 1
+    assert html.count('<div class="pos">verb</div>') == 1
+    assert "a procedure for critical evaluation" in html
+    assert "an event or situation that reveals the strength or quality of someone or something" in html
+    assert "take measures to check the quality" in html
+    assert "/tɛst/" in html  # phonetic from first entry 
