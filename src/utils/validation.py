@@ -1,6 +1,8 @@
 from typing import Dict, Any
+import os
 
 from docs.error_messages import CONFIG_ERRORS
+from docs.user_messages import INITIALIZATION_CONFIGURATION
 
 
 def validate_config(config: Dict[str, Any]) -> None:
@@ -37,4 +39,10 @@ def validate_config(config: Dict[str, Any]) -> None:
     # Config file validation
     config_file = config.get("config_file")
     if config_file != "last_deck.txt":
-        raise ValueError(CONFIG_ERRORS['config_file_invalid']) 
+        raise ValueError(CONFIG_ERRORS['config_file_invalid'])
+
+    # Critical data file validation
+    if not os.path.exists("data/merged_cefr_frequency.csv"):
+        raise ValueError(INITIALIZATION_CONFIGURATION["missing_cefr_file"])
+    if not os.path.exists("data/irregular_verbs.py"):
+        raise ValueError(INITIALIZATION_CONFIGURATION["missing_irregular_verbs_file"]) 

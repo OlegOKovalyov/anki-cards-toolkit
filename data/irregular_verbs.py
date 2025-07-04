@@ -138,6 +138,7 @@ irregular_verbs = {
     "tell": ["tell", "told", "told"],
     "think": ["think", "thought", "thought"],
     "throw": ["throw", "threw", "thrown"],
+    "thrive": ["thrive", "throve", "thriven"],   # також може бути правильне
     "thrust": ["thrust", "thrust", "thrust"],
     "understand": ["understand", "understood", "understood"],
     "upset": ["upset", "upset", "upset"],

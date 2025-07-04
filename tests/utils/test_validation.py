@@ -1,7 +1,9 @@
 import pytest
+import os
 
 from src.utils.validation import validate_config
 from docs.error_messages import CONFIG_ERRORS
+from docs.user_messages import INITIALIZATION_CONFIGURATION
 
 # A valid config for use in tests
 def valid_config():
@@ -89,4 +91,16 @@ def test_validate_config_invalid_config_file():
     config = valid_config()
     config["config_file"] = "wrong.txt"
     with pytest.raises(ValueError, match=CONFIG_ERRORS['config_file_invalid']):
+        validate_config(config)
+
+def test_validate_config_missing_cefr_file(monkeypatch):
+    config = valid_config()
+    monkeypatch.setattr("os.path.exists", lambda path: False if path == "data/merged_cefr_frequency.csv" else True)
+    with pytest.raises(ValueError, match=INITIALIZATION_CONFIGURATION["missing_cefr_file"]):
+        validate_config(config)
+
+def test_validate_config_missing_irregular_verbs_file(monkeypatch):
+    config = valid_config()
+    monkeypatch.setattr("os.path.exists", lambda path: False if path == "data/irregular_verbs.py" else True)
+    with pytest.raises(ValueError, match=INITIALIZATION_CONFIGURATION["missing_irregular_verbs_file"]):
         validate_config(config) 
