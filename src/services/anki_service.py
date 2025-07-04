@@ -2,6 +2,7 @@ import requests
 import sys
 import os
 from dotenv import load_dotenv
+from docs.error_messages import ANKI_ERRORS
 
 load_dotenv()
 
@@ -13,12 +14,12 @@ def check_anki_connect():
         response = requests.get(ANKI_CONNECT_URL)
         return True
     except requests.exceptions.ConnectionError:
-        print("\n❌ Помилка: Не вдалося підключитися до Anki.")
-        print("Будь ласка, запустіть Anki та спробуйте ще раз.")
-        print("📝 Переконайтеся, що:")
-        print("   1. Anki запущено")
-        print("   2. Встановлено додаток AnkiConnect")
-        print("   3. AnkiConnect налаштовано на порт 8765")
+        print(ANKI_ERRORS["connection"])
+        print(ANKI_ERRORS["setup_instructions"])
+        sys.exit(1)
+    except Exception:
+        print(ANKI_ERRORS["connection"])
+        print(ANKI_ERRORS["setup_instructions"])
         sys.exit(1)
 
 def add_note(note: dict):

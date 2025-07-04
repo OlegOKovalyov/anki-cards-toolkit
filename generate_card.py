@@ -46,12 +46,7 @@ validate_config(config)
 # =========================================================================
 # STEP 2: ANKI CONNECTION CHECK (no user prompt, no data loading)
 # =========================================================================
-try:
-    check_anki_connect()
-except Exception as e:
-    print(ANKI_ERRORS['connection'])
-    print(ANKI_ERRORS['setup_instructions'])
-    sys.exit(1)
+check_anki_connect()
 
 # =========================================================================
 # STEP 3: USER INTERACTION & INPUT VALIDATION

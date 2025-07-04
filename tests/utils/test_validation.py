@@ -1,9 +1,12 @@
 import pytest
 import os
+import sys
+import requests
 
 from src.utils.validation import validate_config
 from docs.error_messages import CONFIG_ERRORS
 from docs.user_messages import INITIALIZATION_CONFIGURATION
+from src.services.anki_service import check_anki_connect
 
 # A valid config for use in tests
 def valid_config():
@@ -117,4 +120,17 @@ def test_validate_config_missing_irregular_verbs_file(monkeypatch):
     monkeypatch.setattr("os.path.exists", lambda path: False if path == "data/irregular_verbs.py" else True)
     monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
     with pytest.raises(SystemExit):
-        validate_config(config) 
+        validate_config(config)
+
+def test_check_anki_connect_connection_error(monkeypatch):
+    # Patch requests.get to raise ConnectionError
+    monkeypatch.setattr(requests, "get", lambda *a, **kw: (_ for _ in ()).throw(requests.exceptions.ConnectionError()))
+    # Patch sys.exit to raise SystemExit
+    exit_calls = []
+    def fake_exit(code=1):
+        exit_calls.append(code)
+        raise SystemExit(code)
+    monkeypatch.setattr(sys, "exit", fake_exit)
+    with pytest.raises(SystemExit):
+        check_anki_connect()
+    assert exit_calls == [1] 

@@ -115,3 +115,4 @@ def test_format_dictionary_entry_multi_entry():
     assert "an event or situation that reveals the strength or quality of someone or something" in html
     assert "take measures to check the quality" in html
     assert "/tɛst/" in html  # phonetic from first entry 
+    
