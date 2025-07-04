@@ -41,12 +41,7 @@ config = config_build()
 # Read deck name from last_deck.txt or .env, but do NOT prompt the user before validation
 default_deck_name = get_default_deck_name(config)
 
-try:
-    validate_config(config)
-except ValueError as e:
-    print(INITIALIZATION_CONFIGURATION["config_error"].format(error=e))
-    print(INITIALIZATION_CONFIGURATION["config_fix"])
-    sys.exit(1)
+validate_config(config)
 
 # =========================================================================
 # STEP 2: ANKI CONNECTION CHECK (no user prompt, no data loading)

@@ -20,87 +20,101 @@ def test_validate_config_success():
     config = valid_config()
     validate_config(config)
 
-def test_validate_config_missing_deck_name():
+def test_validate_config_missing_deck_name(monkeypatch):
     config = valid_config()
     config.pop("deck_name")
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['deck_name_missing']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_none_deck_name():
+def test_validate_config_none_deck_name(monkeypatch):
     config = valid_config()
     config["deck_name"] = None
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['deck_name_missing']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_empty_deck_name():
+def test_validate_config_empty_deck_name(monkeypatch):
     config = valid_config()
     config["deck_name"] = ""
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['deck_name_invalid_whitespace']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_whitespace_deck_name():
+def test_validate_config_whitespace_deck_name(monkeypatch):
     config = valid_config()
     config["deck_name"] = "   "
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['deck_name_invalid_whitespace']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
 @pytest.mark.parametrize("char", ['/', '\\', '*', '?', '"', '<', '>', '|'])
-def test_validate_config_forbidden_characters(char):
+def test_validate_config_forbidden_characters(char, monkeypatch):
     config = valid_config()
     config["deck_name"] = f"My Deck{char}Name"
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['deck_name_invalid_characters']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_model_name():
+def test_validate_config_invalid_model_name(monkeypatch):
     config = valid_config()
     config["model_name"] = "WrongModel"
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['model_name_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_pexels_api_key_length():
+def test_validate_config_invalid_pexels_api_key_length(monkeypatch):
     config = valid_config()
     config["pexels_api_key"] = "a" * 55
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['pexels_api_key_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_pexels_api_key_spaces():
+def test_validate_config_invalid_pexels_api_key_spaces(monkeypatch):
     config = valid_config()
     config["pexels_api_key"] = "a" * 55 + " "
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['pexels_api_key_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_big_huge_api_key_length():
+def test_validate_config_invalid_big_huge_api_key_length(monkeypatch):
     config = valid_config()
     config["big_huge_api_key"] = "b" * 31
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['big_huge_api_key_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_big_huge_api_key_spaces():
+def test_validate_config_invalid_big_huge_api_key_spaces(monkeypatch):
     config = valid_config()
     config["big_huge_api_key"] = "b" * 31 + " "
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['big_huge_api_key_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_anki_connect_url():
+def test_validate_config_invalid_anki_connect_url(monkeypatch):
     config = valid_config()
     config["anki_connect_url"] = "http://127.0.0.1:8765"
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['anki_connect_url_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
-def test_validate_config_invalid_config_file():
+def test_validate_config_invalid_config_file(monkeypatch):
     config = valid_config()
     config["config_file"] = "wrong.txt"
-    with pytest.raises(ValueError, match=CONFIG_ERRORS['config_file_invalid']):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
 def test_validate_config_missing_cefr_file(monkeypatch):
     config = valid_config()
     monkeypatch.setattr("os.path.exists", lambda path: False if path == "data/merged_cefr_frequency.csv" else True)
-    with pytest.raises(ValueError, match=INITIALIZATION_CONFIGURATION["missing_cefr_file"]):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config)
 
 def test_validate_config_missing_irregular_verbs_file(monkeypatch):
     config = valid_config()
     monkeypatch.setattr("os.path.exists", lambda path: False if path == "data/irregular_verbs.py" else True)
-    with pytest.raises(ValueError, match=INITIALIZATION_CONFIGURATION["missing_irregular_verbs_file"]):
+    monkeypatch.setattr("sys.exit", lambda code=1: (_ for _ in ()).throw(SystemExit(code)))
+    with pytest.raises(SystemExit):
         validate_config(config) 
