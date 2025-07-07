@@ -18,10 +18,10 @@ def get_clean_sentence_from_clipboard():
         sentence = re.sub(r'-\s*\n\s*', '', sentence)
         # Remove all line breaks
         sentence = re.sub(r'\s*\n\s*', ' ', sentence)
+        # Remove timestamp patterns like mm:ss or h:mm:ss
+        sentence = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", '', sentence)
         # Remove extra spaces before punctuation
         sentence = re.sub(r'\s+([.,:;!?])', r'\1', sentence)
-        # Replace multiple spaces with one
-        sentence = re.sub(r'\s{2,}', ' ', sentence)
         # Replace curly double quotes with straight quotes
         sentence = sentence.replace('“', '"').replace('”', '"')
         # Replace curly single quotes with straight quotes
@@ -30,6 +30,8 @@ def get_clean_sentence_from_clipboard():
         sentence = sentence.replace('∙', '-')
         # Remove carriage returns
         sentence = sentence.replace('\r', '')
+        # Replace multiple spaces with one (do this last)
+        sentence = re.sub(r'\s{2,}', ' ', sentence)
         return sentence.strip()
 
     clipboard_sentence = clean(pyperclip.paste())

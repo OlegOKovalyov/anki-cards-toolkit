@@ -59,7 +59,13 @@ GENERAL_ERRORS = {
     'unexpected': "❌ Неочікувана помилка: {error}",
     'invalid_input': "❌ Невірний ввід: {error}",
     'file_not_found': "❌ Файл не знайдено: {filename}",
-    'permission_denied': "❌ Відмовлено в доступі до файлу: {filename}"
+    'permission_denied': "❌ Відмовлено в доступі до файлу: {filename}",
+    'http_error': "❌ HTTP помилка: {error}",
+    'connection': "❌ Помилка підключення: перевірте підключення до інтернету",
+    'timeout': "❌ Перевищено час очікування",
+    'request_error': "❌ Помилка запиту: {error}",
+    'auth': "❌ Помилка авторизації",
+    'rate_limit': "❌ Перевищено ліміт запитів"
 }
 
 # Success Messages

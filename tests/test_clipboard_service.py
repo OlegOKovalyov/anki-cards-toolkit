@@ -42,4 +42,11 @@ def test_empty_clipboard_user_enters_nothing(monkeypatch):
     # Simulate user pressing Enter (no input) when clipboard is empty
     monkeypatch.setattr('builtins.input', lambda prompt: "")
     with pytest.raises(SystemExit):
-        get_clean_sentence_from_clipboard() 
+        get_clean_sentence_from_clipboard()
+
+def test_get_clean_sentence_removes_timestamps(monkeypatch):
+    pyperclip.copy("Well, we're going to give you a similar library\n21:51\nfor at least the next week...")
+    monkeypatch.setattr('builtins.input', lambda prompt: "")
+    cleaned = get_clean_sentence_from_clipboard()
+    expected = "Well, we're going to give you a similar library for at least the next week..."
+    assert cleaned == expected 
