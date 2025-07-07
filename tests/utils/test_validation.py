@@ -4,8 +4,7 @@ import sys
 import requests
 
 from src.utils.validation import validate_config
-from docs.error_messages import CONFIG_ERRORS
-from docs.user_messages import INITIALIZATION_CONFIGURATION
+from docs.messages import INITIALIZATION_CONFIGURATION
 from src.services.anki_service import check_anki_connect
 
 # A valid config for use in tests

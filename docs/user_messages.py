@@ -1,11 +1,3 @@
-# STEP 1: INITIALIZATION & CONFIGURATION
-INITIALIZATION_CONFIGURATION = {
-    "config_error": "\n❌ Config error: {error}",
-    "config_fix": "Please fix the configuration and try again.",
-    "missing_cefr_file": "The required data file 'data/merged_cefr_frequency.csv' is missing. Please ensure it exists in the data/ directory.",
-    "missing_irregular_verbs_file": "The required data file 'data/irregular_verbs.py' is missing. Please ensure it exists in the data/ directory."
-}
-
 # STEP 3: USER INTERACTION & INPUT VALIDATION
 USER_INTERACTION_INPUT_VALIDATION = {
     "word_prompt": "🔤 Введи слово, яке хочеш вивчати: ",

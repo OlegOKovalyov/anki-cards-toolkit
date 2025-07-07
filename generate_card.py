@@ -5,8 +5,8 @@ from docs.error_messages import (
     ANKI_ERRORS,
     TTS_ERRORS
 )
+from docs.messages import INITIALIZATION_CONFIGURATION
 from docs.user_messages import (
-    INITIALIZATION_CONFIGURATION,
     USER_INTERACTION_INPUT_VALIDATION,
     DATA_GATHERING_PROCESSING,
     MEDIA_FILE_UPLOAD,
