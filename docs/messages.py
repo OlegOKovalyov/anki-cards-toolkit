@@ -12,4 +12,16 @@ INITIALIZATION_CONFIGURATION = {
     "big_huge_api_key_invalid": "BIG_HUGE_API_KEY must be exactly 32 characters long and contain no spaces.",
     "anki_connect_url_invalid": "ANKI_CONNECT_URL must be exactly 'http://localhost:8765'.",
     "config_file_invalid": "CONFIG_FILE must be exactly 'last_deck.txt'."
+}
+
+# STEP 2: ANKI CONNECTION CHECK
+ANKI_CONNECTION_CHECK = {
+    "connection_error": "❌ Не вдалося підключитися до Anki",
+    "setup_instructions": """
+📝 Переконайтеся, що:
+   1. Anki запущено
+   2. Встановлено додаток AnkiConnect
+   3. AnkiConnect налаштовано на порт 8765""",
+    "add_card_connection_error": "❌ Не вдалося додати картку: немає зʼєднання з Anki",
+    "add_card_generic_error": "❌ Помилка при додаванні картки: {error}"
 } 

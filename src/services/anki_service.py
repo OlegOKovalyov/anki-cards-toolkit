@@ -2,7 +2,7 @@ import requests
 import sys
 import os
 from dotenv import load_dotenv
-from docs.error_messages import ANKI_ERRORS
+from docs.messages import ANKI_CONNECTION_CHECK
 
 load_dotenv()
 
@@ -14,12 +14,12 @@ def check_anki_connect():
         response = requests.get(ANKI_CONNECT_URL)
         return True
     except requests.exceptions.ConnectionError:
-        print(ANKI_ERRORS["connection"])
-        print(ANKI_ERRORS["setup_instructions"])
+        print(ANKI_CONNECTION_CHECK["connection_error"])
+        print(ANKI_CONNECTION_CHECK["setup_instructions"])
         sys.exit(1)
     except Exception:
-        print(ANKI_ERRORS["connection"])
-        print(ANKI_ERRORS["setup_instructions"])
+        print(ANKI_CONNECTION_CHECK["connection_error"])
+        print(ANKI_CONNECTION_CHECK["setup_instructions"])
         sys.exit(1)
 
 def add_note(note: dict):
@@ -42,6 +42,6 @@ def add_note(note: dict):
         else:
             raise Exception(f"AnkiConnect error: {result['error']}")
     except requests.exceptions.ConnectionError:
-        raise Exception("❌ Не вдалося додати картку: немає зʼєднання з Anki")
+        raise Exception(ANKI_CONNECTION_CHECK["add_card_connection_error"])
     except Exception as e:
-        raise Exception(f"❌ Помилка при додаванні картки: {str(e)}") 
+        raise Exception(ANKI_CONNECTION_CHECK["add_card_generic_error"].format(error=str(e))) 
