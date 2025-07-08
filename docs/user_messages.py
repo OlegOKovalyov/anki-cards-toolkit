@@ -1,9 +1,3 @@
-# STEP 3: USER INTERACTION & INPUT VALIDATION
-USER_INTERACTION_INPUT_VALIDATION = {
-    "word_prompt": "🔤 Введи слово, яке хочеш вивчати: ",
-    "pos_prompt": "📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: "
-}
-
 # STEP 4: DATA GATHERING & PROCESSING
 DATA_GATHERING_PROCESSING = {
     "translation_intro": "\n📝 Введіть український переклад:",

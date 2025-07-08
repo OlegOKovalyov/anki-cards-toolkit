@@ -24,4 +24,46 @@ ANKI_CONNECTION_CHECK = {
    3. AnkiConnect налаштовано на порт 8765""",
     "add_card_connection_error": "❌ Не вдалося додати картку: немає зʼєднання з Anki",
     "add_card_generic_error": "❌ Помилка при додаванні картки: {error}"
+}
+
+# STEP 3: USER INTERACTION & INPUT VALIDATION
+USER_INTERACTION_INPUT_VALIDATION = {
+    # Deck name prompt
+    "deck_name_prompt": "Введіть назву колоди [{last_deck}]: ",
+    # Deck creation errors
+    "deck_creation_error": "⚠️ Помилка створення колоди: {error}",
+    "deck_creation_timeout": "❌ Перевищено час очікування відповіді від Anki",
+    "deck_creation_request_error": "❌ Помилка запиту до Anki: {error}",
+    "deck_creation_unexpected_error": "❌ Неочікувана помилка при створенні колоди: {error}",
+    # Clipboard/sentence prompts
+    "clipboard_sentence_prompt": "📋 Скопійоване речення:\n{clipboard_sentence}\nВсе вірно? [Натисніть Enter при згоді або введіть заново]: ",
+    "clipboard_empty_prompt": "Буфер обміну порожній. Будь ласка, введіть речення тут: ",
+    "sentence_not_provided": "Речення не було надано. Можливо, виникла проблема з буфером обміну або вашим введеним даних. Вихід.",
+    # POS detection error
+    "pos_detection_error": "⚠️ Помилка при визначенні частини мови: {error}",
+    # Word and POS prompts (from user_messages.py)
+    "word_prompt": "🔤 Введи слово, яке хочеш вивчати: ",
+    "pos_prompt": "📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: "
+}
+
+# STEP 4: DATA GATHERING & PROCESSING
+DATA_GATHERING_PROCESSING = {
+    "translation_intro": "\n📝 Введіть український переклад:",
+    "translation_prompt": "🔤 Введіть слова перекладу (розділяйте комами): "
+}
+
+# STEP 5: MEDIA FILE UPLOAD
+MEDIA_FILE_UPLOAD = {
+    # No direct user messages in this step currently
+}
+
+# STEP 6: CARD CONSTRUCTION & SUBMISSION
+CARD_CONSTRUCTION_SUBMISSION = {
+    "card_added": "✅ Картку додано: ID = {card_id}",
+    "exception": "{error}"
+}
+
+# DEVELOPER / SYSTEM MESSAGES
+DEVELOPER_NOTES = {
+    "nltk_download_failure": "⚠️ Could not download NLTK data for testing: {error}"
 } 

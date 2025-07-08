@@ -3,6 +3,7 @@
 import pyperclip
 import re
 import sys
+from docs.messages import USER_INTERACTION_INPUT_VALIDATION
 
 def get_clean_sentence_from_clipboard():
     """
@@ -37,16 +38,16 @@ def get_clean_sentence_from_clipboard():
     clipboard_sentence = clean(pyperclip.paste())
 
     if clipboard_sentence:
-        user_input = input(f"📋 Скопійоване речення:\n{clipboard_sentence}\nВсе вірно? [Натисніть Enter при згоді або введіть заново]: ").strip()
+        user_input = input(USER_INTERACTION_INPUT_VALIDATION["clipboard_sentence_prompt"].format(clipboard_sentence=clipboard_sentence)).strip()
         if user_input:
             sentence = user_input.strip()
         else:
             sentence = clipboard_sentence
     else:
-        sentence = input("Буфер обміну порожній. Будь ласка, введіть речення тут: ").strip()
+        sentence = input(USER_INTERACTION_INPUT_VALIDATION["clipboard_empty_prompt"]).strip()
 
     if not sentence:
-        print("Речення не було надано. Можливо, виникла проблема з буфером обміну або вашим введеним даних. Вихід.")
+        print(USER_INTERACTION_INPUT_VALIDATION["sentence_not_provided"])
         sys.exit(1)
 
     return sentence 

@@ -8,6 +8,7 @@ import nltk
 from nltk import pos_tag, word_tokenize
 from nltk.stem import WordNetLemmatizer
 import re
+from docs.messages import USER_INTERACTION_INPUT_VALIDATION, DEVELOPER_NOTES
 
 # Add project root to path to allow absolute imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -64,7 +65,7 @@ def detect_pos_from_context(word, sentence):
         return 'noun'
 
     except Exception as e:
-        print(f"⚠️ Помилка при визначенні частини мови: {str(e)}")
+        print(USER_INTERACTION_INPUT_VALIDATION["pos_detection_error"].format(error=str(e)))
         return _fallback_pos_detection(word, sentence)
 
 
@@ -147,4 +148,4 @@ if __name__ == "__main__":
         nltk.download('wordnet', quiet=True)
         nltk.download('omw-1.4', quiet=True)
     except Exception as e:
-        print(f"⚠️ Could not download NLTK data for testing: {e}") 
+        print(DEVELOPER_NOTES["nltk_download_failure"].format(error=e)) 
