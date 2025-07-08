@@ -88,7 +88,12 @@ TTS_ERRORS = {
 
 # STEP 5: MEDIA FILE UPLOAD
 MEDIA_FILE_UPLOAD = {
-    # No direct user messages in this step currently
+    "media_save_error": "⚠️ Помилка додавання {filename}: {error}",
+    "media_connection_error": "⚠️ Не вдалося зберегти {filename}: немає зʼєднання з Anki",
+    "media_timeout_error": "⚠️ Не вдалося зберегти {filename}: перевищено час очікування",
+    "media_request_error": "⚠️ Помилка запиту при збереженні {filename}: {error}",
+    "media_unexpected_error": "⚠️ Неочікувана помилка при збереженні {filename}: {error}",
+    "file_saved": "📁 Файл {filename} збережено"
 }
 
 # STEP 6: CARD CONSTRUCTION & SUBMISSION
