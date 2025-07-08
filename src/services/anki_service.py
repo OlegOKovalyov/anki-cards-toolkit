@@ -2,7 +2,7 @@ import requests
 import sys
 import os
 from dotenv import load_dotenv
-from docs.messages import ANKI_CONNECTION_CHECK
+from docs.messages import ANKI_CONNECTION_CHECK, CARD_CONSTRUCTION_SUBMISSION
 
 load_dotenv()
 
@@ -44,4 +44,4 @@ def add_note(note: dict):
     except requests.exceptions.ConnectionError:
         raise Exception(ANKI_CONNECTION_CHECK["add_card_connection_error"])
     except Exception as e:
-        raise Exception(ANKI_CONNECTION_CHECK["add_card_generic_error"].format(error=str(e))) 
+        raise Exception(CARD_CONSTRUCTION_SUBMISSION["note_add_error"].format(error=str(e))) 

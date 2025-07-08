@@ -1,10 +1,6 @@
 import sys
 from dotenv import load_dotenv
 from src.utils.config_builder import config_build, get_default_deck_name
-from docs.error_messages import (
-    ANKI_ERRORS,
-    TTS_ERRORS
-)
 from docs.messages import (
     INITIALIZATION_CONFIGURATION,
     USER_INTERACTION_INPUT_VALIDATION,

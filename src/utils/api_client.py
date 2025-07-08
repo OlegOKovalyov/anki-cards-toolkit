@@ -1,6 +1,6 @@
 import requests
 from typing import Optional, Any, Dict
-from docs.error_messages import GENERAL_ERRORS
+from docs.messages import GENERAL_ERRORS
 
 def get_api_data(
     url: str, 

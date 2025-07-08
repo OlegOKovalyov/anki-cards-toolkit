@@ -99,10 +99,25 @@ MEDIA_FILE_UPLOAD = {
 # STEP 6: CARD CONSTRUCTION & SUBMISSION
 CARD_CONSTRUCTION_SUBMISSION = {
     "card_added": "✅ Картку додано: ID = {card_id}",
-    "exception": "{error}"
+    "exception": "{error}",
+    "note_add_error": "❌ Помилка додавання картки: {error}"
 }
 
 # DEVELOPER / SYSTEM MESSAGES
 DEVELOPER_NOTES = {
     "nltk_download_failure": "⚠️ Could not download NLTK data for testing: {error}"
+}
+
+# GENERAL ERRORS (used by API client and other modules)
+GENERAL_ERRORS = {
+    'unexpected': "❌ Неочікувана помилка: {error}",
+    'invalid_input': "❌ Невірний ввід: {error}",
+    'file_not_found': "❌ Файл не знайдено: {filename}",
+    'permission_denied': "❌ Відмовлено в доступі до файлу: {filename}",
+    'http_error': "❌ HTTP помилка: {error}",
+    'connection': "❌ Помилка підключення: перевірте підключення до інтернету",
+    'timeout': "❌ Перевищено час очікування",
+    'request_error': "❌ Помилка запиту: {error}",
+    'auth': "❌ Помилка авторизації",
+    'rate_limit': "❌ Перевищено ліміт запитів"
 } 
