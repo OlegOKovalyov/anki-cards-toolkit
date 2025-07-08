@@ -4,6 +4,7 @@ import os
 import tempfile
 import webbrowser
 from src.services.pexels_api import fetch_pexels_images
+from docs.messages import DATA_GATHERING_PROCESSING
 
 def create_image_selection_page(images, word):
     """Create HTML page for image selection."""
@@ -26,7 +27,7 @@ def create_image_selection_page(images, word):
 def select_image(images, word):
     """Interactive image selection interface with visual preview."""
     if not images:
-        print("Зображень не знайдено.")
+        print(DATA_GATHERING_PROCESSING["no_images_found"])
         return None
     html_content = create_image_selection_page(images, word)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
@@ -44,9 +45,9 @@ def select_image(images, word):
                 os.unlink(gallery_path)
                 return images[choice - 1]['src']['medium']
             else:
-                print(f"❌ Будь ласка, введіть число від 1 до {len(images)}")
+                print(DATA_GATHERING_PROCESSING["image_invalid_number"].format(max=len(images)))
         except ValueError:
-            print("❌ Будь ласка, введіть правильне число")
+            print(DATA_GATHERING_PROCESSING["image_invalid_input"])
 
 def select_image_for_card(word: str) -> str:
     """
@@ -58,11 +59,12 @@ def select_image_for_card(word: str) -> str:
     - If the user presses Escape, return an empty string.
     - If no images are found, also return an empty string.
     """
-    print("\n🔍 Пошук відповідних зображень...")
+    print(DATA_GATHERING_PROCESSING["image_searching"])
     images = fetch_pexels_images(word)
     if not images:
-        print("⚠️ Зображень не знайдено. Продовжую без зображення.")
+        print(DATA_GATHERING_PROCESSING["image_none_continue"])
         return ""
+    print(DATA_GATHERING_PROCESSING["image_found_count"].format(count=len(images)))
     print(f"Знайдено {len(images)} зображень. Відкриваю попередній перегляд у браузері...")
     html_content = create_image_selection_page(images, word)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
@@ -74,20 +76,20 @@ def select_image_for_card(word: str) -> str:
             choice = input(f"\n🔢 Введіть номер (1-{len(images)}) або натисніть Enter: ").strip()
             if choice == "":
                 os.unlink(gallery_path)
-                print("✅ Вибрано перше зображення за замовчуванням.")
+                print(DATA_GATHERING_PROCESSING["image_default_selected"])
                 return images[0]['src']['medium']
             if choice.lower() in {"esc", "escape"}:
                 os.unlink(gallery_path)
-                print("⚠️ Зображення не вибрано. Продовжую без зображення.")
+                print(DATA_GATHERING_PROCESSING["image_skip_notice"])
                 return ""
             idx = int(choice)
             if 1 <= idx <= len(images):
                 os.unlink(gallery_path)
-                print("✅ Зображення успішно вибрано.")
+                print(DATA_GATHERING_PROCESSING["image_selected"])
                 return images[idx - 1]['src']['medium']
             else:
                 os.unlink(gallery_path)
-                print("⚠️ Номер поза діапазоном. Вибрано перше зображення за замовчуванням.")
+                print(DATA_GATHERING_PROCESSING["image_out_of_range"])
                 return images[0]['src']['medium']
         except ValueError:
-            print(f"❌ Будь ласка, введіть число від 1 до {len(images)}, Enter для першого, або Esc для пропуску.") 
+            print(DATA_GATHERING_PROCESSING["image_number_full_prompt"].format(max=len(images))) 

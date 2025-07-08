@@ -3,6 +3,7 @@
 import os
 import csv
 from src.utils.api_client import get_api_data
+from docs.messages import DATA_GATHERING_PROCESSING
 
 BIG_HUGE_API_KEY = os.getenv("BIG_HUGE_API_KEY")
 
@@ -22,11 +23,11 @@ def load_cefr_frequency_data():
                 cefr = row['CEFR'].strip().upper()
                 freq = row['Frequency'].strip()
                 cefr_freq_data[word] = {'cefr': cefr, 'frequency': freq}
-        print(f"✅ Loaded CEFR/frequency data for {len(cefr_freq_data)} words")
+        print(DATA_GATHERING_PROCESSING["cefr_loaded"].format(count=len(cefr_freq_data)))
         CEFR_FREQUENCY_DATA.update(cefr_freq_data)
         return cefr_freq_data
     except Exception as e:
-        print(f"⚠️ Could not load CEFR/frequency data: {str(e)}")
+        print(DATA_GATHERING_PROCESSING["cefr_load_error"].format(error=str(e)))
         CEFR_FREQUENCY_DATA.clear()
         return {}
 
@@ -42,7 +43,7 @@ def format_dictionary_entry(data):
         elif isinstance(data, list):
             entries = data
         else:
-            return "Invalid dictionary data."
+            return DATA_GATHERING_PROCESSING["dict_invalid_format"]
 
         html = []
         # Add CSS styles
@@ -203,25 +204,28 @@ def format_dictionary_entry(data):
         html.append('</div>')
         return "\n".join(html)
     except Exception as e:
-        print(f"❌ Error formatting dictionary entry: {str(e)}")
-        return "Error formatting dictionary entry."
+        print(DATA_GATHERING_PROCESSING["dict_format_error"].format(error=str(e)))
+        return DATA_GATHERING_PROCESSING["dict_format_generic"]
 
 def _fetch_dictionary_api_data(word: str):
     """Fetch raw word data from the DictionaryAPI."""
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     data = get_api_data(url)
-    return data if data else None
+    if not data:
+        print(DATA_GATHERING_PROCESSING["dict_fetch_error"].format(word=word))
+        return None
+    return data
 
 def _fetch_thesaurus_api_data(word: str):
     """Fetch raw thesaurus data from Big Huge Thesaurus."""
     if not BIG_HUGE_API_KEY:
-        print("❌ BIG_HUGE_API_KEY не знайдено. Перевірте ваш .env файл.")
+        print(DATA_GATHERING_PROCESSING["thesaurus_key_missing"])
         return None
     url = f"https://words.bighugelabs.com/api/2/{BIG_HUGE_API_KEY}/{word}/json"
-    print(f"\n🔍 Запит до Big Huge Thesaurus для слова '{word}'...")
+    print(DATA_GATHERING_PROCESSING["thesaurus_query"].format(word=word))
     data = get_api_data(url)
     if data:
-        print("✅ Отримано відповідь від Big Huge Thesaurus")
+        print(DATA_GATHERING_PROCESSING["thesaurus_success"])
     return data
 
 def _process_thesaurus_data(thesaurus_data, requested_pos=None):
@@ -268,7 +272,7 @@ def fetch_word_data(word: str, requested_pos: str = None):
     """
     dictionary_data = _fetch_dictionary_api_data(word)
     if not dictionary_data:
-        print(f"❌ Не вдалося отримати дані зі словника для '{word}'.")
+        print(DATA_GATHERING_PROCESSING["dict_fetch_error"].format(word=word))
         return None
 
     thesaurus_data = _fetch_thesaurus_api_data(word)
@@ -280,7 +284,7 @@ def fetch_word_data(word: str, requested_pos: str = None):
     elif isinstance(dictionary_data, list):
         entries = dictionary_data
     else:
-        print("❌ Невірний формат даних словника.")
+        print(DATA_GATHERING_PROCESSING["dict_invalid_format"])
         return None
 
     # Aggregate all meanings from all entries
@@ -295,7 +299,7 @@ def fetch_word_data(word: str, requested_pos: str = None):
                 target_meaning = m
                 break
         if not target_meaning:
-            print(f"⚠️ Визначення для '{requested_pos}' не знайдено. Використовується перше доступне.")
+            print(DATA_GATHERING_PROCESSING["dict_pos_not_found"].format(requested_pos=requested_pos))
             target_meaning = all_meanings[0] if all_meanings else {}
     else:
         target_meaning = all_meanings[0] if all_meanings else {}

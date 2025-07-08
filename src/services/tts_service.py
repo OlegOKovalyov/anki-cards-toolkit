@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 from gtts import gTTS
 import requests
-from docs.error_messages import TTS_ERRORS
+from docs.messages import TTS_ERRORS
 
 def generate_tts_base64(text: str, filename_prefix: str) -> tuple[str | None, str | None]:
     """
