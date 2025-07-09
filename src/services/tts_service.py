@@ -5,14 +5,16 @@ from io import BytesIO
 from gtts import gTTS
 import requests
 from docs.messages import TTS_ERRORS
+import sys
 
-def generate_tts_base64(text: str, filename_prefix: str) -> tuple[str | None, str | None]:
+def generate_tts_base64(text: str, filename_prefix: str, exit_on_error: bool = True) -> tuple[str | None, str | None]:
     """
     Generates base64-encoded audio from text using Google TTS.
 
     Args:
         text (str): The text to convert to speech.
         filename_prefix (str): A prefix (like the word being studied) to create a unique filename.
+        exit_on_error (bool): If True, print error and exit on failure. If False, just return (None, None).
 
     Returns:
         A tuple containing the Anki sound reference string and the base64-encoded data,
@@ -28,7 +30,13 @@ def generate_tts_base64(text: str, filename_prefix: str) -> tuple[str | None, st
         return sound_ref, encoded_data
     except requests.exceptions.ConnectionError:
         print(TTS_ERRORS['connection'])
+        if exit_on_error:
+            print(TTS_ERRORS['skip_card'])
+            sys.exit(1)
         return None, None
     except Exception as e:
         print(TTS_ERRORS['generation'].format(error=str(e)))
+        if exit_on_error:
+            print(TTS_ERRORS['skip_card'])
+            sys.exit(1)
         return None, None 

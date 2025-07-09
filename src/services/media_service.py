@@ -17,6 +17,8 @@ def send_media_file(name: str, b64_data: str) -> bool:
     Returns:
         True if the file was sent successfully, False otherwise.
     """
+    if not b64_data:
+        return False
     payload = {
         "action": "storeMediaFile",
         "version": 6,

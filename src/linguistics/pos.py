@@ -122,20 +122,21 @@ def _fallback_pos_detection(word, sentence):
     return "noun"
 
 
-def get_irregular_forms(word):
+def get_irregular_forms(word: str) -> str:
     """
-    Returns a list of irregular verb forms if the word is an infinitive.
-    If the word is not an irregular verb, returns None.
-    
+    Returns a formatted string of irregular verb forms (e.g., 'flee - fled - fled') if the word is an irregular verb.
+    If the word is not an irregular verb, returns an empty string.
+
     Args:
         word (str): The word to check
-        
     Returns:
-        list or None: List of irregular verb forms or None
+        str: Formatted irregular forms or empty string
     """
-    # Lower case for reliable search
     key = word.lower()
-    return irregular_verbs.get(key)
+    forms = irregular_verbs.get(key)
+    if forms:
+        return " - ".join(forms)
+    return ""
 
 
 if __name__ == "__main__":

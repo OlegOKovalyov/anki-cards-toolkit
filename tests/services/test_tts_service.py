@@ -26,7 +26,7 @@ def test_generate_tts_base64_success(mock_gtts):
 @patch('src.services.tts_service.gTTS', side_effect=Exception("TTS API is down"))
 def test_generate_tts_base64_failure(mock_gtts):
     """Test TTS generation failure."""
-    sound_ref, encoded_data = generate_tts_base64("hello", "hello_word")
+    sound_ref, encoded_data = generate_tts_base64("hello", "hello_word", exit_on_error=False)
     
     assert sound_ref is None
     assert encoded_data is None

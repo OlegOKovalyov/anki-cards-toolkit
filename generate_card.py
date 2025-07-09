@@ -2,12 +2,9 @@ import sys
 from dotenv import load_dotenv
 from src.utils.config_builder import config_build, get_default_deck_name
 from docs.messages import (
-    INITIALIZATION_CONFIGURATION,
     USER_INTERACTION_INPUT_VALIDATION,
     DATA_GATHERING_PROCESSING,
-    MEDIA_FILE_UPLOAD,
-    CARD_CONSTRUCTION_SUBMISSION,
-    TTS_ERRORS
+    CARD_CONSTRUCTION_SUBMISSION
 )
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
@@ -24,6 +21,7 @@ from src.services.anki_service import check_anki_connect, add_note
 from src.services.deck_service import get_deck_name, create_deck_if_not_exists
 from src.utils.validation import validate_config
 from src.utils.note_builder import build_anki_note
+from src.utils.note_builder import submit_note_to_anki
 
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
@@ -86,21 +84,11 @@ image_url = select_image_for_card(word)
 
 # Generate audio files
 word_audio_ref, word_audio_data = generate_tts_base64(word, word)
-if word_audio_ref is None or word_audio_data is None:
-    print(TTS_ERRORS["skip_card"])
-    sys.exit(1)
 
 sentence_audio_ref, sentence_audio_data = generate_tts_base64(sentence, f"sentence_{word}")
-if sentence_audio_ref is None or sentence_audio_data is None:
-    print(TTS_ERRORS["skip_card"])
-    sys.exit(1)
 
 # Get irregular verb forms
-forms = get_irregular_forms(word)
-if forms:
-    irregular_forms_field = " - ".join(forms)  # Наприклад, "flee - fled - fled"
-else:
-    irregular_forms_field = ""
+irregular_forms_field = get_irregular_forms(word)
 
 # Get Ukrainian translation
 print(DATA_GATHERING_PROCESSING["translation_intro"])
@@ -114,35 +102,28 @@ dictionary_entry = format_dictionary_entry(dictionary_data["dictionary_api_respo
 # ============================================================================
 
 # Upload audio files to Anki
-if word_audio_data:
-    send_media_file(f"tts_{word}.mp3", word_audio_data)
-
-if sentence_audio_data:
-    send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
+send_media_file(f"tts_{word}.mp3", word_audio_data)
+send_media_file(f"tts_sentence_{word}.mp3", sentence_audio_data)
 
 # ============================================================================
 # STEP 6: CARD CONSTRUCTION & SUBMISSION
 # ============================================================================
 
-# Build note structure
-note = build_anki_note(
-    word=word,
-    sentence=sentence,
-    highlighted=highlighted,
-    image_url=image_url,
-    dictionary_data=dictionary_data,
-    sentence_audio_ref=sentence_audio_ref,
-    word_audio_ref=word_audio_ref,
-    irregular_forms_field=irregular_forms_field,
-    dictionary_entry=dictionary_entry,
-    translation_ua=translation_ua,
-    config=config,
-    deck_name=deck_name
-)
+# Build card data dictionary
+card_data = {
+    "word": word,
+    "sentence": sentence,
+    "highlighted": highlighted,
+    "image_url": image_url,
+    "dictionary_data": dictionary_data,
+    "sentence_audio_ref": sentence_audio_ref,
+    "word_audio_ref": word_audio_ref,
+    "irregular_forms_field": irregular_forms_field,
+    "dictionary_entry": dictionary_entry,
+    "translation_ua": translation_ua,
+    "config": config,
+    "deck_name": deck_name
+}
 
 # Submit card to Anki
-try:
-    result = add_note(note)
-    print(CARD_CONSTRUCTION_SUBMISSION["card_added"].format(card_id=result['result']))
-except Exception as e:
-    print(CARD_CONSTRUCTION_SUBMISSION["exception"].format(error=str(e)))
+submit_note_to_anki(**card_data)
