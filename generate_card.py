@@ -22,6 +22,7 @@ from src.services.deck_service import get_deck_name, create_deck_if_not_exists
 from src.utils.validation import validate_config
 from src.utils.note_builder import build_anki_note
 from src.utils.note_builder import submit_note_to_anki
+from src.ui.user_input import get_confirmed_pos
 
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
@@ -58,10 +59,7 @@ sentence = get_clean_sentence_from_clipboard()
 word = input(USER_INTERACTION_INPUT_VALIDATION["word_prompt"]).strip().lower()
 
 # Detect and confirm part of speech
-detected_pos = detect_pos_from_context(word, sentence) or "noun"
-pos = input(USER_INTERACTION_INPUT_VALIDATION["pos_prompt"].format(detected_pos=detected_pos)).strip().lower()
-if not pos:
-    pos = detected_pos
+pos = get_confirmed_pos(word, sentence)
 
 # ============================================================================
 # STEP 4: DATA GATHERING & PROCESSING
@@ -72,8 +70,6 @@ load_cefr_frequency_data()
 
 # Fetch dictionary data with confirmed POS
 dictionary_data = fetch_word_data(word, pos)
-if not dictionary_data:
-    exit(1)
 
 # Highlight focus word in sentence
 pos_map = {'noun': 'n', 'verb': 'v', 'adjective': 'a', 'adverb': 'r'}

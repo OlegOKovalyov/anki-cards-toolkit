@@ -56,8 +56,9 @@ def test_fetch_word_data_dict_fails(mock_fetch_dict):
     """Test when the dictionary API call fails."""
     mock_fetch_dict.return_value = None
 
-    result = fetch_word_data("test")
-    assert result is None
+    import pytest
+    with pytest.raises(SystemExit):
+        fetch_word_data("test")
 
 @patch('src.services.dictionary_service._fetch_thesaurus_api_data')
 @patch('src.services.dictionary_service._fetch_dictionary_api_data')

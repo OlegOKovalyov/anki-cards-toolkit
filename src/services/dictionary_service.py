@@ -2,6 +2,7 @@
 
 import os
 import csv
+import sys
 from src.utils.api_client import get_api_data
 from docs.messages import DATA_GATHERING_PROCESSING
 
@@ -269,11 +270,12 @@ def fetch_word_data(word: str, requested_pos: str = None):
     """
     Fetches and processes word data from both Dictionary and Thesaurus APIs.
     Returns a structured dictionary for the Anki card.
+    Exits if no dictionary data is found.
     """
     dictionary_data = _fetch_dictionary_api_data(word)
     if not dictionary_data:
         print(DATA_GATHERING_PROCESSING["dict_fetch_error"].format(word=word))
-        return None
+        sys.exit(1)
 
     thesaurus_data = _fetch_thesaurus_api_data(word)
     processed_thesaurus = _process_thesaurus_data(thesaurus_data, requested_pos)
