@@ -3,16 +3,14 @@ from dotenv import load_dotenv
 from src.utils.config_builder import config_build, get_default_deck_name
 from docs.messages import (
     USER_INTERACTION_INPUT_VALIDATION,
-    DATA_GATHERING_PROCESSING,
-    CARD_CONSTRUCTION_SUBMISSION
+    DATA_GATHERING_PROCESSING
 )
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
 from src.services.dictionary_service import (
     fetch_word_data,
-    format_dictionary_entry,
-    load_cefr_frequency_data
+    format_dictionary_entry
 )
 from src.services.tts_service import generate_tts_base64
 from src.services.media_service import send_media_file
@@ -66,7 +64,7 @@ pos = get_confirmed_pos(word, sentence)
 # ============================================================================
 
 # Load CEFR/frequency data for 172782 words
-load_cefr_frequency_data()
+
 
 # Fetch dictionary data with confirmed POS
 dictionary_data = fetch_word_data(word, pos)
