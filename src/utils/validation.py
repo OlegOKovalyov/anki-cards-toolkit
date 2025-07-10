@@ -3,7 +3,7 @@ import os
 import sys
 
 from docs.messages import INITIALIZATION_CONFIGURATION
-from src.config.settings import ANKI_CONNECT_URL, CONFIG_FILE
+from src.config.settings import ANKI_CONNECT_URL, CONFIG_FILE, MODEL_NAME
 
 
 def validate_config(config: Dict[str, Any]) -> None:
@@ -20,7 +20,7 @@ def validate_config(config: Dict[str, Any]) -> None:
 
         # Model name validation
         model_name = config.get("model_name")
-        if model_name != "VocabCard_English_UA":
+        if model_name != MODEL_NAME:
             raise ValueError(INITIALIZATION_CONFIGURATION['model_name_invalid'])
 
         # Pexels API key validation

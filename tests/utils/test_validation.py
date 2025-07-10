@@ -12,7 +12,7 @@ from src.config import settings
 def valid_config():
     return {
         "deck_name": "Valid Deck",
-        "model_name": "VocabCard_English_UA",
+        "model_name": settings.MODEL_NAME,
         "pexels_api_key": "a" * 56,
         "big_huge_api_key": "b" * 32,
         "anki_connect_url": settings.ANKI_CONNECT_URL,
