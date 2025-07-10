@@ -86,6 +86,12 @@ TTS_ERRORS = {
     'skip_card': "❌ Сталася помилка під час генерації аудіо через gTTS API. Спробуйте пізніше."
 }
 
+# STEP 4: PEXELS ERRORS
+PEXELS_ERRORS = {
+    "missing_api_key": "❌ PEXELS_API_KEY не знайдено. Перевірте ваш .env файл.",
+    "image_not_found": "⚠️ Не вдалося отримати зображення для '{query}' з Pexels."
+}
+
 # STEP 5: MEDIA FILE UPLOAD
 MEDIA_FILE_UPLOAD = {
     "media_save_error": "⚠️ Помилка додавання {filename}: {error}",

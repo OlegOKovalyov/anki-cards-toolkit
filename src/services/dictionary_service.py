@@ -6,9 +6,7 @@ from src.utils.api_client import get_api_data
 from docs.messages import DATA_GATHERING_PROCESSING
 from src.ui.html_templates import render_dictionary_html
 from src.services.cefr_data import CEFR_FREQUENCY_DATA
-from src.config import settings
-
-BIG_HUGE_API_KEY = settings.BIG_HUGE_API_KEY
+from src.config.settings import DICTIONARY_API_URL, BIGHUGE_API_URL, BIG_HUGE_API_KEY
 
 # Load CEFR and frequency data at startup
 
@@ -26,7 +24,7 @@ def format_dictionary_entry(data):
 
 def _fetch_dictionary_api_data(word: str):
     """Fetch raw word data from the DictionaryAPI."""
-    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+    url = f"{DICTIONARY_API_URL}/{word}"
     data = get_api_data(url)
     if not data:
         print(DATA_GATHERING_PROCESSING["dict_fetch_error"].format(word=word))
@@ -38,7 +36,7 @@ def _fetch_thesaurus_api_data(word: str):
     if not BIG_HUGE_API_KEY:
         print(DATA_GATHERING_PROCESSING["thesaurus_key_missing"])
         return None
-    url = f"https://words.bighugelabs.com/api/2/{BIG_HUGE_API_KEY}/{word}/json"
+    url = f"{BIGHUGE_API_URL}/{BIG_HUGE_API_KEY}/{word}/json"
     print(DATA_GATHERING_PROCESSING["thesaurus_query"].format(word=word))
     data = get_api_data(url)
     if data:

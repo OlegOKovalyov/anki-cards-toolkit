@@ -19,4 +19,9 @@ BIG_HUGE_API_KEY = os.getenv("BIG_HUGE_API_KEY", "")  # API key for Big Huge The
 ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL", "http://localhost:8765")  # URL of the AnkiConnect server
 
 # Path to the file where the name of the last used deck will be stored
-CONFIG_FILE = os.getenv("CONFIG_FILE", "last_deck.txt") 
+CONFIG_FILE = os.getenv("CONFIG_FILE", "last_deck.txt")
+
+# API URLs
+DICTIONARY_API_URL = os.getenv("DICTIONARY_API_URL", "https://api.dictionaryapi.dev/api/v2/entries/en")
+BIGHUGE_API_URL = os.getenv("BIGHUGE_API_URL", "https://words.bighugelabs.com/api/2") 
+PEXELS_API_URL = os.getenv("PEXELS_API_URL", "https://api.pexels.com/v1/search") 
