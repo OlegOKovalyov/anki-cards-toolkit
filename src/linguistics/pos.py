@@ -137,16 +137,3 @@ def get_irregular_forms(word: str) -> str:
     if forms:
         return " - ".join(forms)
     return ""
-
-
-if __name__ == "__main__":
-    # Ensure NLTK data is available for standalone script execution
-    try:
-        nltk.download('punkt', quiet=True)
-        nltk.download('punkt_tab', quiet=True)
-        nltk.download('averaged_perceptron_tagger', quiet=True)
-        nltk.download('averaged_perceptron_tagger_eng', quiet=True)
-        nltk.download('wordnet', quiet=True)
-        nltk.download('omw-1.4', quiet=True)
-    except Exception as e:
-        print(DEVELOPER_NOTES["nltk_download_failure"].format(error=e)) 

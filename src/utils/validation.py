@@ -3,6 +3,7 @@ import os
 import sys
 
 from docs.messages import INITIALIZATION_CONFIGURATION
+from src.config.settings import ANKI_CONNECT_URL, CONFIG_FILE
 
 
 def validate_config(config: Dict[str, Any]) -> None:
@@ -34,12 +35,12 @@ def validate_config(config: Dict[str, Any]) -> None:
 
         # AnkiConnect URL validation
         anki_connect_url = config.get("anki_connect_url")
-        if anki_connect_url != "http://localhost:8765":
+        if anki_connect_url != ANKI_CONNECT_URL:
             raise ValueError(INITIALIZATION_CONFIGURATION['anki_connect_url_invalid'])
 
         # Config file validation
         config_file = config.get("config_file")
-        if config_file != "last_deck.txt":
+        if config_file != CONFIG_FILE:
             raise ValueError(INITIALIZATION_CONFIGURATION['config_file_invalid'])
 
         # Critical data file validation

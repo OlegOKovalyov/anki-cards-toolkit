@@ -15,8 +15,8 @@ def valid_config():
         "model_name": "VocabCard_English_UA",
         "pexels_api_key": "a" * 56,
         "big_huge_api_key": "b" * 32,
-        "anki_connect_url": "http://localhost:8765",
-        "config_file": "last_deck.txt",
+        "anki_connect_url": settings.ANKI_CONNECT_URL,
+        "config_file": settings.CONFIG_FILE,
     }
 
 def test_validate_config_success():

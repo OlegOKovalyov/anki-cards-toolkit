@@ -1,6 +1,6 @@
 """A service for fetching images from the Pexels API."""
 
-from src.config.settings import PEXELS_API_KEY, PEXELS_API_URL
+from src.config.settings import PEXELS_API_KEY, PEXELS_API_URL, PEXELS_IMAGE_COUNT
 from docs.messages import PEXELS_ERRORS
 from src.utils.api_client import get_api_data
 
@@ -14,7 +14,7 @@ def fetch_pexels_images(query: str):
     
     url = PEXELS_API_URL
     headers = {"Authorization": PEXELS_API_KEY}
-    params = {"query": query, "per_page": 16}
+    params = {"query": query, "per_page": PEXELS_IMAGE_COUNT}
     
     data = get_api_data(url, headers=headers, params=params, timeout=20)
     

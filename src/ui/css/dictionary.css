@@ -1,0 +1,74 @@
+.dictionary-entry {
+    text-align: left;
+    line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.word-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    width: 100%;
+}
+.word-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.word {
+    font-size: 1.5em;
+    color: #ffa94d;
+    font-weight: 600;
+}
+.cefr-freq {
+    color: #868e96;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.phonetic {
+    color: #adb5bd;
+    font-size: 1.1em;
+}
+.pos {
+    color: #868e96;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+.definition-block {
+    margin-left: 20px;
+    margin-bottom: 6px;
+}
+.definition {
+    font-size: 0.85em;
+    color: #ced4da;
+    line-height: 1.2;
+}
+.example {
+    margin-left: 20px;
+    margin-top: 2px;
+    color: #d4c4a1;
+    font-style: italic;
+    font-size: 0.8em;
+}
+.word-relations {
+    margin-left: 20px;
+    margin-top: 2px;
+    font-size: 0.75em;
+}
+.synonyms {
+    color: #74c0fc;
+}
+.antonyms {
+    color: #ffa8a8;
+}
+.additional-relations {
+    margin-left: 20px;
+    margin-top: 4px;
+    font-size: 0.75em;
+    font-style: italic;
+} 

@@ -59,9 +59,6 @@ pos = get_confirmed_pos(word, sentence)
 # STEP 4: DATA GATHERING & PROCESSING
 # ============================================================================
 
-# Load CEFR/frequency data for 172782 words
-
-
 # Fetch dictionary data with confirmed POS
 dictionary_data = fetch_word_data(word, pos)
 
