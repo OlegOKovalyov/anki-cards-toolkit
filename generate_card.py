@@ -1,5 +1,4 @@
 import sys
-from dotenv import load_dotenv
 from src.utils.config_builder import config_build, get_default_deck_name
 from docs.messages import (
     USER_INTERACTION_INPUT_VALIDATION,
@@ -25,9 +24,6 @@ from src.ui.user_input import get_confirmed_pos
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
 # ============================================================================
-
-# Load .env file
-load_dotenv(override=True)
 
 # ===== STRICT EARLY CONFIG VALIDATION (no user prompt, no data loading) =====
 config = config_build()

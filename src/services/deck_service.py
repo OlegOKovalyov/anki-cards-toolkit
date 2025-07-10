@@ -1,12 +1,10 @@
 import os
 import requests
-from dotenv import load_dotenv
 from docs.messages import USER_INTERACTION_INPUT_VALIDATION
+from src.config import settings
 
-load_dotenv()
-
-CONFIG_FILE = os.getenv("CONFIG_FILE")  # last_deck.txt
-ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL", "http://localhost:8765")
+CONFIG_FILE = settings.CONFIG_FILE
+ANKI_CONNECT_URL = settings.ANKI_CONNECT_URL
 
 def load_last_deck():
     if os.path.exists(CONFIG_FILE):

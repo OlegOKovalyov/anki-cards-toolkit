@@ -1,10 +1,10 @@
 """A service for uploading media files to AnkiConnect."""
 
-import os
 import requests
 from docs.messages import MEDIA_FILE_UPLOAD
+from src.config import settings
 
-ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL", "http://localhost:8765")
+ANKI_CONNECT_URL = settings.ANKI_CONNECT_URL
 
 def send_media_file(name: str, b64_data: str) -> bool:
     """

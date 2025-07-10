@@ -6,6 +6,7 @@ import requests
 from src.utils.validation import validate_config
 from docs.messages import INITIALIZATION_CONFIGURATION
 from src.services.anki_service import check_anki_connect
+from src.config import settings
 
 # A valid config for use in tests
 def valid_config():

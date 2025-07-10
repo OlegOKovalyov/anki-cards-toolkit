@@ -1,14 +1,14 @@
 """A service for fetching and consolidating data from dictionary and thesaurus APIs."""
 
-import os
 import csv
 import sys
 from src.utils.api_client import get_api_data
 from docs.messages import DATA_GATHERING_PROCESSING
 from src.ui.html_templates import render_dictionary_html
 from src.services.cefr_data import CEFR_FREQUENCY_DATA
+from src.config import settings
 
-BIG_HUGE_API_KEY = os.getenv("BIG_HUGE_API_KEY")
+BIG_HUGE_API_KEY = settings.BIG_HUGE_API_KEY
 
 # Load CEFR and frequency data at startup
 

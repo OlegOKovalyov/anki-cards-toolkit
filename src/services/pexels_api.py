@@ -1,9 +1,9 @@
 """A service for fetching images from the Pexels API."""
 
-import os
+from src.config import settings
 from src.utils.api_client import get_api_data
 
-PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
+PEXELS_API_KEY = settings.PEXELS_API_KEY
 
 def fetch_pexels_images(query: str):
     """

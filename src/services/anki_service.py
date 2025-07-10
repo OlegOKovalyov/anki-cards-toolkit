@@ -1,12 +1,9 @@
 import requests
 import sys
-import os
-from dotenv import load_dotenv
+from src.config import settings
 from docs.messages import ANKI_CONNECTION_CHECK, CARD_CONSTRUCTION_SUBMISSION
 
-load_dotenv()
-
-ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL", "http://localhost:8765")
+ANKI_CONNECT_URL = settings.ANKI_CONNECT_URL
 
 def check_anki_connect():
     """Check if AnkiConnect is available. If not, print instructions and exit immediately."""
