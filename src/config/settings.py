@@ -26,3 +26,7 @@ DICTIONARY_API_URL = os.getenv("DICTIONARY_API_URL", "https://api.dictionaryapi.
 BIGHUGE_API_URL = os.getenv("BIGHUGE_API_URL", "https://words.bighugelabs.com/api/2") 
 PEXELS_API_URL = os.getenv("PEXELS_API_URL", "https://api.pexels.com/v1/search") 
 PEXELS_IMAGE_COUNT = int(os.getenv("PEXELS_IMAGE_COUNT", "16")) 
+
+# User locale for message translation (e.g., 'en' or 'uk')
+# Check if USER_LOCALE is set, if not, it will be handled by language_config module
+USER_LOCALE = os.getenv("USER_LOCALE", "") 

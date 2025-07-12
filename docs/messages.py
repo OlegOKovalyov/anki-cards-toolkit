@@ -11,120 +11,123 @@ INITIALIZATION_CONFIGURATION = {
     "pexels_api_key_invalid": "PEXELS_API_KEY must be exactly 56 characters long and contain no spaces.",
     "big_huge_api_key_invalid": "BIG_HUGE_API_KEY must be exactly 32 characters long and contain no spaces.",
     "anki_connect_url_invalid": "ANKI_CONNECT_URL must be exactly 'http://localhost:8765'.",
-    "config_file_invalid": "CONFIG_FILE must be exactly 'last_deck.txt'."
+    "config_file_invalid": "CONFIG_FILE must be exactly 'last_deck.txt'.",
+    "language_prompt": "Please choose your language / Будь ласка, оберіть мову:\n[1] English\n[2] Українська\n> ",
+    "language_invalid_choice": "❌ Invalid choice. Please enter 1 for English or 2 for Українська: ",
+    "language_set": "✅ Language set to: {language}"
 }
 
 # STEP 2: ANKI CONNECTION CHECK
 ANKI_CONNECTION_CHECK = {
-    "connection_error": "❌ Не вдалося підключитися до Anki",
+    "connection_error": "❌ Failed to connect to Anki",
     "setup_instructions": """
-📝 Переконайтеся, що:
-   1. Anki запущено
-   2. Встановлено додаток AnkiConnect
-   3. AnkiConnect налаштовано на порт 8765""",
-    "add_card_connection_error": "❌ Не вдалося додати картку: немає зʼєднання з Anki",
-    "add_card_generic_error": "❌ Помилка при додаванні картки: {error}"
+📝 Make sure that:
+   1. Anki is running
+   2. The AnkiConnect add-on is installed
+   3. AnkiConnect is configured to use port 8765""",
+    "add_card_connection_error": "❌ Failed to add the card: no connection to Anki",
+    "add_card_generic_error": "❌ Error while adding the card: {error}"
 }
 
 # STEP 3: USER INTERACTION & INPUT VALIDATION
 USER_INTERACTION_INPUT_VALIDATION = {
     # Deck name prompt
-    "deck_name_prompt": "Введіть назву колоди [{last_deck}]: ",
+    "deck_name_prompt": "Enter deck name [{last_deck}]: ",
     # Deck creation errors
-    "deck_creation_error": "⚠️ Помилка створення колоди: {error}",
-    "deck_creation_timeout": "❌ Перевищено час очікування відповіді від Anki",
-    "deck_creation_request_error": "❌ Помилка запиту до Anki: {error}",
-    "deck_creation_unexpected_error": "❌ Неочікувана помилка при створенні колоди: {error}",
+    "deck_creation_error": "⚠️ Error creating deck: {error}",
+    "deck_creation_timeout": "❌ Timeout while waiting for response from Anki",
+    "deck_creation_request_error": "❌ Request error while communicating with Anki: {error}",
+    "deck_creation_unexpected_error": "❌ Unexpected error while creating deck: {error}",
     # Clipboard/sentence prompts
-    "clipboard_sentence_prompt": "📋 Скопійоване речення:\n{clipboard_sentence}\nВсе вірно? [Натисніть Enter при згоді або введіть заново]: ",
-    "clipboard_empty_prompt": "Буфер обміну порожній. Будь ласка, введіть речення тут: ",
-    "sentence_not_provided": "Речення не було надано. Можливо, виникла проблема з буфером обміну або вашим введеним даних. Вихід.",
+    "clipboard_sentence_prompt": "📋 Copied sentence:\n{clipboard_sentence}\nIs it correct? [Press Enter to confirm or type again]: ",
+    "clipboard_empty_prompt": "Clipboard is empty. Please enter the sentence here: ",
+    "sentence_not_provided": "No sentence was provided. There may be an issue with the clipboard or your input. Exiting.",
     # POS detection error
-    "pos_detection_error": "⚠️ Помилка при визначенні частини мови: {error}",
-    # Word and POS prompts (from user_messages.py)
-    "word_prompt": "🔤 Введи слово, яке хочеш вивчати: ",
-    "pos_prompt": "📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: "
+    "pos_detection_error": "⚠️ Error detecting part of speech: {error}",
+    # Word and POS prompts
+    "word_prompt": "🔤 Enter the word you want to study: ",
+    "pos_prompt": "📝 Part of speech [{detected_pos}] [Press Enter to confirm or change (noun/verb/adjective/adverb)]: "
 }
 
 # STEP 4: DATA GATHERING & PROCESSING
 DATA_GATHERING_PROCESSING = {
-    "translation_intro": "\n📝 Введіть український переклад:",
-    "translation_prompt": "🔤 Введіть слова перекладу (розділяйте комами): ",
+    "translation_intro": "\n📝 Enter the Ukrainian translation:",
+    "translation_prompt": "🔤 Enter translated words (separate with commas): ",
     # CEFR/frequency data loading
     "cefr_loaded": "✅ Loaded CEFR/frequency data for {count} words",
     "cefr_load_error": "⚠️ Could not load CEFR/frequency data: {error}",
     # Dictionary fetch/format
-    "dict_fetch_error": "❌ Не вдалося отримати дані зі словника для '{word}'.",
+    "dict_fetch_error": "❌ Failed to fetch dictionary data for '{word}'.",
     "dict_format_error": "❌ Error formatting dictionary entry: {error}",
     "dict_format_invalid": "Invalid dictionary data.",
     "dict_format_generic": "Error formatting dictionary entry.",
-    "dict_invalid_format": "❌ Невірний формат даних словника.",
-    "dict_pos_not_found": "⚠️ Визначення для '{requested_pos}' не знайдено. Використовується перше доступне.",
+    "dict_invalid_format": "❌ Invalid dictionary data format.",
+    "dict_pos_not_found": "⚠️ Definition for '{requested_pos}' not found. Using the first available one.",
     # Thesaurus
-    "thesaurus_key_missing": "❌ BIG_HUGE_API_KEY не знайдено. Перевірте ваш .env файл.",
-    "thesaurus_query": "\n🔍 Запит до Big Huge Thesaurus для слова '{word}'...",
-    "thesaurus_success": "✅ Отримано відповідь від Big Huge Thesaurus",
+    "thesaurus_key_missing": "❌ BIG_HUGE_API_KEY not found. Please check your .env file.",
+    "thesaurus_query": "\n🔍 Querying Big Huge Thesaurus for '{word}'...",
+    "thesaurus_success": "✅ Received response from Big Huge Thesaurus",
     # Image selection
-    "no_images_found": "Зображень не знайдено.",
-    "image_number_prompt": "\n🔢 Введіть номер зображення (1-{max}) або натисніть Enter для пропуску: ",
-    "image_invalid_number": "❌ Будь ласка, введіть число від 1 до {max}",
-    "image_invalid_input": "❌ Будь ласка, введіть правильне число",
-    "image_searching": "\n🔍 Пошук відповідних зображень...",
-    "image_none_continue": "⚠️ Зображень не знайдено. Продовжую без зображення.",
-    "image_found_count": "Знайдено {count} зображень. Відкриваю попередній перегляд у браузері...",
-    "image_selected": "✅ Зображення успішно вибрано.",
-    "image_skip_notice": "⚠️ Зображення не вибрано. Продовжую без зображення.",
-    "image_default_selected": "✅ Вибрано перше зображення за замовчуванням.",
-    "image_out_of_range": "⚠️ Номер поза діапазоном. Вибрано перше зображення за замовчуванням.",
-    "image_number_full_prompt": "❌ Будь ласка, введіть число від 1 до {max}, Enter для першого, або Esc для пропуску."
+    "no_images_found": "No images found.",
+    "image_number_prompt": "\n🔢 Enter image number (1-{max}) or press Enter to skip: ",
+    "image_invalid_number": "❌ Please enter a number between 1 and {max}",
+    "image_invalid_input": "❌ Please enter a valid number",
+    "image_searching": "\n🔍 Searching for suitable images...",
+    "image_none_continue": "⚠️ No images found. Continuing without an image.",
+    "image_found_count": "Found {count} images. Opening preview in browser...",
+    "image_selected": "✅ Image successfully selected.",
+    "image_skip_notice": "⚠️ No image selected. Continuing without an image.",
+    "image_default_selected": "✅ First image selected by default.",
+    "image_out_of_range": "⚠️ Number out of range. First image selected by default.",
+    "image_number_full_prompt": "❌ Please enter a number between 1 and {max}, press Enter for the first one, or Esc to skip."
 }
 
 # STEP 4: IMAGE SELECTION MESSAGES
 IMAGE_SELECTION_MESSAGES = {
-    "no_images_found": "Зображень не знайдено.",
-    "prompt_basic": "\n🔢 Введіть номер зображення (1-{count}) або натисніть Enter для пропуску: ",
-    "image_invalid_number": "❌ Будь ласка, введіть число від 1 до {max}",
-    "image_invalid_input": "❌ Будь ласка, введіть правильне число",
-    "image_searching": "\n🔍 Пошук відповідних зображень...",
-    "image_none_continue": "⚠️ Зображень не знайдено. Продовжую без зображення.",
-    "image_found_count": "Знайдено {count} зображень. Відкриваю попередній перегляд у браузері...",
-    "preview_start": "Знайдено {count} зображень. Відкриваю попередній перегляд у браузері...",
-    "prompt_range": "\n🔢 Введіть номер (1-{count}) або натисніть Enter: ",
-    "image_default_selected": "✅ Вибрано перше зображення за замовчуванням.",
-    "image_skip_notice": "⚠️ Зображення не вибрано. Продовжую без зображення.",
-    "image_selected": "✅ Зображення успішно вибрано.",
-    "image_out_of_range": "⚠️ Номер поза діапазоном. Вибрано перше зображення за замовчуванням.",
-    "image_number_full_prompt": "❌ Будь ласка, введіть число від 1 до {max}, Enter для першого, або Esc для пропуску."
+    "no_images_found": "No images found.",
+    "prompt_basic": "\n🔢 Enter the image number (1-{count}) or press Enter to skip: ",
+    "image_invalid_number": "❌ Please enter a number between 1 and {max}",
+    "image_invalid_input": "❌ Please enter a valid number",
+    "image_searching": "\n🔍 Searching for relevant images...",
+    "image_none_continue": "⚠️ No images found. Continuing without an image.",
+    "image_found_count": "Found {count} images. Opening preview in browser...",
+    "preview_start": "Found {count} images. Opening preview in browser...",
+    "prompt_range": "\n🔢 Enter a number (1-{count}) or press Enter: ",
+    "image_default_selected": "✅ First image selected by default.",
+    "image_skip_notice": "⚠️ No image selected. Continuing without an image.",
+    "image_selected": "✅ Image successfully selected.",
+    "image_out_of_range": "⚠️ Number out of range. First image selected by default.",
+    "image_number_full_prompt": "❌ Please enter a number between 1 and {max}, press Enter for the first one, or Esc to skip."
 }
 
 # STEP 4: TTS ERRORS
 TTS_ERRORS = {
-    'connection': "❌ Помилка: Не вдалося підключитися до сервісу TTS. Перевірте підключення до інтернету",
-    'generation': "❌ Помилка при генерації TTS: {error}",
-    'skip_card': "❌ Сталася помилка під час генерації аудіо через gTTS API. Спробуйте пізніше."
+    'connection': "❌ Error: Failed to connect to the TTS service. Please check your internet connection",
+    'generation': "❌ Error during TTS generation: {error}",
+    'skip_card': "❌ An error occurred while generating audio via gTTS API. Please try again later."
 }
 
 # STEP 4: PEXELS ERRORS
 PEXELS_ERRORS = {
-    "missing_api_key": "❌ PEXELS_API_KEY не знайдено. Перевірте ваш .env файл.",
-    "image_not_found": "⚠️ Не вдалося отримати зображення для '{query}' з Pexels."
+    "missing_api_key": "❌ PEXELS_API_KEY not found. Please check your .env file.",
+    "image_not_found": "⚠️ Failed to fetch image for '{query}' from Pexels."
 }
 
 # STEP 5: MEDIA FILE UPLOAD
 MEDIA_FILE_UPLOAD = {
-    "media_save_error": "⚠️ Помилка додавання {filename}: {error}",
-    "media_connection_error": "⚠️ Не вдалося зберегти {filename}: немає зʼєднання з Anki",
-    "media_timeout_error": "⚠️ Не вдалося зберегти {filename}: перевищено час очікування",
-    "media_request_error": "⚠️ Помилка запиту при збереженні {filename}: {error}",
-    "media_unexpected_error": "⚠️ Неочікувана помилка при збереженні {filename}: {error}",
-    "file_saved": "📁 Файл {filename} збережено"
+    "media_save_error": "⚠️ Error adding {filename}: {error}",
+    "media_connection_error": "⚠️ Failed to save {filename}: no connection to Anki",
+    "media_timeout_error": "⚠️ Failed to save {filename}: request timed out",
+    "media_request_error": "⚠️ Request error while saving {filename}: {error}",
+    "media_unexpected_error": "⚠️ Unexpected error while saving {filename}: {error}",
+    "file_saved": "📁 File {filename} saved"
 }
 
 # STEP 6: CARD CONSTRUCTION & SUBMISSION
 CARD_CONSTRUCTION_SUBMISSION = {
-    "card_added": "✅ Картку додано: ID = {card_id}",
+    "card_added": "✅ Card added: ID = {card_id}",
     "exception": "{error}",
-    "note_add_error": "❌ Помилка додавання картки: {error}"
+    "note_add_error": "❌ Error adding card: {error}"
 }
 
 # DEVELOPER / SYSTEM MESSAGES
@@ -134,14 +137,14 @@ DEVELOPER_NOTES = {
 
 # GENERAL ERRORS (used by API client and other modules)
 GENERAL_ERRORS = {
-    'unexpected': "❌ Неочікувана помилка: {error}",
-    'invalid_input': "❌ Невірний ввід: {error}",
-    'file_not_found': "❌ Файл не знайдено: {filename}",
-    'permission_denied': "❌ Відмовлено в доступі до файлу: {filename}",
-    'http_error': "❌ HTTP помилка: {error}",
-    'connection': "❌ Помилка підключення: перевірте підключення до інтернету",
-    'timeout': "❌ Перевищено час очікування",
-    'request_error': "❌ Помилка запиту: {error}",
-    'auth': "❌ Помилка авторизації",
-    'rate_limit': "❌ Перевищено ліміт запитів"
-} 
+    'unexpected': "❌ Unexpected error: {error}",
+    'invalid_input': "❌ Invalid input: {error}",
+    'file_not_found': "❌ File not found: {filename}",
+    'permission_denied': "❌ Permission denied for file: {filename}",
+    'http_error': "❌ HTTP error: {error}",
+    'connection': "❌ Connection error: please check your internet connection",
+    'timeout': "❌ Request timed out",
+    'request_error': "❌ Request error: {error}",
+    'auth': "❌ Authorization error",
+    'rate_limit': "❌ Request rate limit exceeded"
+}

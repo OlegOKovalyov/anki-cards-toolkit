@@ -1,4 +1,6 @@
 import sys
+from src.cli.args import handle_cli_arguments
+from src.config.language_config import initialize_language_if_needed
 from src.utils.config_builder import config_build, get_default_deck_name
 from docs.messages import (
     USER_INTERACTION_INPUT_VALIDATION,
@@ -20,6 +22,18 @@ from src.utils.validation import validate_config
 from src.utils.note_builder import build_anki_note
 from src.utils.note_builder import submit_note_to_anki
 from src.ui.user_input import get_confirmed_pos
+
+# ============================================================================
+# CLI ARGUMENT HANDLING
+# ============================================================================
+if not handle_cli_arguments():
+    sys.exit(0)
+
+# ============================================================================
+# LANGUAGE INITIALIZATION
+# ============================================================================
+# Initialize language configuration early if needed
+initialize_language_if_needed()
 
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
