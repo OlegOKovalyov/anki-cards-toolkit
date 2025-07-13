@@ -2,10 +2,7 @@ import sys
 from src.cli.args import handle_cli_arguments
 from src.config.language_config import initialize_language_if_needed
 from src.utils.config_builder import config_build, get_default_deck_name
-from docs.messages import (
-    USER_INTERACTION_INPUT_VALIDATION,
-    DATA_GATHERING_PROCESSING
-)
+from src.locales.loader import get_message
 from src.services.clipboard_service import get_clean_sentence_from_clipboard
 from src.linguistics.pos import detect_pos_from_context, get_irregular_forms
 from src.utils.highlight import highlight_focus_word
@@ -24,6 +21,10 @@ from src.utils.note_builder import submit_note_to_anki
 from src.ui.user_input import get_confirmed_pos
 
 # ============================================================================
+# STEP 1: INITIALIZATION & CONFIGURATION
+# ============================================================================
+
+# ============================================================================
 # CLI ARGUMENT HANDLING
 # ============================================================================
 if not handle_cli_arguments():
@@ -34,10 +35,6 @@ if not handle_cli_arguments():
 # ============================================================================
 # Initialize language configuration early if needed
 initialize_language_if_needed()
-
-# ============================================================================
-# STEP 1: INITIALIZATION & CONFIGURATION
-# ============================================================================
 
 # ===== STRICT EARLY CONFIG VALIDATION (no user prompt, no data loading) =====
 config = config_build()
@@ -64,7 +61,7 @@ create_deck_if_not_exists(deck_name)
 sentence = get_clean_sentence_from_clipboard()
 
 # Get focus word from user
-word = input(USER_INTERACTION_INPUT_VALIDATION["word_prompt"]).strip().lower()
+word = input(get_message("USER_INTERACTION_INPUT_VALIDATION.word_prompt")).strip().lower()
 
 # Detect and confirm part of speech
 pos = get_confirmed_pos(word, sentence)
@@ -92,8 +89,8 @@ sentence_audio_ref, sentence_audio_data = generate_tts_base64(sentence, f"senten
 irregular_forms_field = get_irregular_forms(word)
 
 # Get Ukrainian translation
-print(DATA_GATHERING_PROCESSING["translation_intro"])
-translation_ua = input(DATA_GATHERING_PROCESSING["translation_prompt"]).strip()
+print(get_message("DATA_GATHERING_PROCESSING.translation_intro"))
+translation_ua = input(get_message("DATA_GATHERING_PROCESSING.translation_prompt")).strip()
 
 # Format full dictionary entry
 dictionary_entry = format_dictionary_entry(dictionary_data["dictionary_api_response"])

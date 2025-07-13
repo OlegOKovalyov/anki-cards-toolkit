@@ -3,7 +3,7 @@
 import pyperclip
 import re
 import sys
-from docs.messages import USER_INTERACTION_INPUT_VALIDATION
+from src.locales.loader import get_message
 
 def get_clean_sentence_from_clipboard():
     """
@@ -23,9 +23,8 @@ def get_clean_sentence_from_clipboard():
         sentence = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", '', sentence)
         # Remove extra spaces before punctuation
         sentence = re.sub(r'\s+([.,:;!?])', r'\1', sentence)
-        # Replace curly double quotes with straight quotes
+        # Restore curly quote cleaning
         sentence = sentence.replace('“', '"').replace('”', '"')
-        # Replace curly single quotes with straight quotes
         sentence = sentence.replace('‘', "'").replace('’', "'")
         # Replace middle dot with dash
         sentence = sentence.replace('∙', '-')
@@ -38,16 +37,16 @@ def get_clean_sentence_from_clipboard():
     clipboard_sentence = clean(pyperclip.paste())
 
     if clipboard_sentence:
-        user_input = input(USER_INTERACTION_INPUT_VALIDATION["clipboard_sentence_prompt"].format(clipboard_sentence=clipboard_sentence)).strip()
+        user_input = input(get_message("USER_INTERACTION_INPUT_VALIDATION.clipboard_sentence_prompt", clipboard_sentence=clipboard_sentence)).strip()
         if user_input:
             sentence = user_input.strip()
         else:
             sentence = clipboard_sentence
     else:
-        sentence = input(USER_INTERACTION_INPUT_VALIDATION["clipboard_empty_prompt"]).strip()
+        sentence = input(get_message("USER_INTERACTION_INPUT_VALIDATION.clipboard_empty_prompt")).strip()
 
     if not sentence:
-        print(USER_INTERACTION_INPUT_VALIDATION["sentence_not_provided"])
+        print(get_message("USER_INTERACTION_INPUT_VALIDATION.sentence_not_provided"))
         sys.exit(1)
 
     return sentence 

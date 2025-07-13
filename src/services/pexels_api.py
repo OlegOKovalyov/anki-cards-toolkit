@@ -1,7 +1,7 @@
 """A service for fetching images from the Pexels API."""
 
 from src.config.settings import PEXELS_API_KEY, PEXELS_API_URL, PEXELS_IMAGE_COUNT
-from docs.messages import PEXELS_ERRORS
+from src.locales.loader import get_message
 from src.utils.api_client import get_api_data
 
 def fetch_pexels_images(query: str):
@@ -9,7 +9,7 @@ def fetch_pexels_images(query: str):
     Fetch images from the Pexels API.
     """
     if not PEXELS_API_KEY:
-        print(PEXELS_ERRORS["missing_api_key"])
+        print(get_message("PEXELS_ERRORS.missing_api_key"))
         return []
     
     url = PEXELS_API_URL
@@ -21,5 +21,5 @@ def fetch_pexels_images(query: str):
     if data and "photos" in data:
         return data["photos"]
     
-    print(PEXELS_ERRORS["image_not_found"].format(query=query))
+    print(get_message("PEXELS_ERRORS.image_not_found", query=query))
     return [] 

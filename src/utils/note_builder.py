@@ -1,5 +1,5 @@
 from src.services.anki_service import add_note
-from docs.messages import CARD_CONSTRUCTION_SUBMISSION
+from src.locales.loader import get_message
 
 def build_anki_note(
     word: str,
@@ -55,6 +55,6 @@ def submit_note_to_anki(**card_data):
     note = build_anki_note(**card_data)
     try:
         result = add_note(note)
-        print(CARD_CONSTRUCTION_SUBMISSION["card_added"].format(card_id=result['result']))
+        print(get_message("CARD_CONSTRUCTION_SUBMISSION.card_added", card_id=result['result']))
     except Exception as e:
-        print(CARD_CONSTRUCTION_SUBMISSION["exception"].format(error=str(e))) 
+        print(get_message("CARD_CONSTRUCTION_SUBMISSION.exception", error=str(e))) 

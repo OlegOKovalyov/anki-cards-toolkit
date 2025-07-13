@@ -4,7 +4,7 @@ import os
 import tempfile
 import webbrowser
 from src.services.pexels_api import fetch_pexels_images
-from docs.messages import IMAGE_SELECTION_MESSAGES
+from src.locales.loader import get_message
 from src.config.settings import PEXELS_IMAGE_COUNT
 
 def create_image_selection_page(images, word):
@@ -28,7 +28,7 @@ def create_image_selection_page(images, word):
 def select_image(images, word):
     """Interactive image selection interface with visual preview."""
     if not images:
-        print(IMAGE_SELECTION_MESSAGES["no_images_found"])
+        print(get_message("IMAGE_SELECTION_MESSAGES.no_images_found"))
         return None
     html_content = create_image_selection_page(images, word)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
@@ -37,7 +37,7 @@ def select_image(images, word):
     webbrowser.open('file://' + os.path.abspath(gallery_path))
     while True:
         try:
-            choice = input(IMAGE_SELECTION_MESSAGES["prompt_basic"].format(count=PEXELS_IMAGE_COUNT)).strip()
+            choice = input(get_message("IMAGE_SELECTION_MESSAGES.prompt_basic", count=PEXELS_IMAGE_COUNT)).strip()
             if not choice:
                 os.unlink(gallery_path)
                 return None
@@ -46,9 +46,9 @@ def select_image(images, word):
                 os.unlink(gallery_path)
                 return images[choice - 1]['src']['medium']
             else:
-                print(IMAGE_SELECTION_MESSAGES["image_invalid_number"].format(max=len(images)))
+                print(get_message("IMAGE_SELECTION_MESSAGES.image_invalid_number", max=len(images)))
         except ValueError:
-            print(IMAGE_SELECTION_MESSAGES["image_invalid_input"])
+            print(get_message("IMAGE_SELECTION_MESSAGES.image_invalid_input"))
 
 def select_image_for_card(word: str) -> str:
     """
@@ -60,13 +60,13 @@ def select_image_for_card(word: str) -> str:
     - If the user presses Escape, return an empty string.
     - If no images are found, also return an empty string.
     """
-    print(IMAGE_SELECTION_MESSAGES["image_searching"])
+    print(get_message("IMAGE_SELECTION_MESSAGES.image_searching"))
     images = fetch_pexels_images(word)
     if not images:
-        print(IMAGE_SELECTION_MESSAGES["image_none_continue"])
+        print(get_message("IMAGE_SELECTION_MESSAGES.image_none_continue"))
         return ""
-    print(IMAGE_SELECTION_MESSAGES["image_found_count"].format(count=len(images)))
-    print(IMAGE_SELECTION_MESSAGES["preview_start"].format(count=len(images)))
+    print(get_message("IMAGE_SELECTION_MESSAGES.image_found_count", count=len(images)))
+    print(get_message("IMAGE_SELECTION_MESSAGES.preview_start", count=len(images)))
     html_content = create_image_selection_page(images, word)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
         f.write(html_content)
@@ -74,23 +74,23 @@ def select_image_for_card(word: str) -> str:
     webbrowser.open('file://' + os.path.abspath(gallery_path))
     while True:
         try:
-            choice = input(IMAGE_SELECTION_MESSAGES["prompt_range"].format(count=len(images))).strip()
+            choice = input(get_message("IMAGE_SELECTION_MESSAGES.prompt_range", count=len(images))).strip()
             if choice == "":
                 os.unlink(gallery_path)
-                print(IMAGE_SELECTION_MESSAGES["image_default_selected"])
+                print(get_message("IMAGE_SELECTION_MESSAGES.image_default_selected"))
                 return images[0]['src']['medium']
             if choice.lower() in {"esc", "escape"}:
                 os.unlink(gallery_path)
-                print(IMAGE_SELECTION_MESSAGES["image_skip_notice"])
+                print(get_message("IMAGE_SELECTION_MESSAGES.image_skip_notice"))
                 return ""
             idx = int(choice)
             if 1 <= idx <= len(images):
                 os.unlink(gallery_path)
-                print(IMAGE_SELECTION_MESSAGES["image_selected"])
+                print(get_message("IMAGE_SELECTION_MESSAGES.image_selected"))
                 return images[idx - 1]['src']['medium']
             else:
                 os.unlink(gallery_path)
-                print(IMAGE_SELECTION_MESSAGES["image_out_of_range"])
+                print(get_message("IMAGE_SELECTION_MESSAGES.image_out_of_range"))
                 return images[0]['src']['medium']
         except ValueError:
-            print(IMAGE_SELECTION_MESSAGES["image_number_full_prompt"].format(max=len(images))) 
+            print(get_message("IMAGE_SELECTION_MESSAGES.image_number_full_prompt", max=len(images))) 

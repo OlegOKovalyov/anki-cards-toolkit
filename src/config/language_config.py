@@ -1,5 +1,7 @@
 import os
 import re
+import sys
+import subprocess
 from typing import Optional
 
 def get_language_choice() -> str:
@@ -61,7 +63,13 @@ def configure_language() -> str:
     set_msg = INITIALIZATION_CONFIGURATION["language_set"].format(language=language_name)
     print(set_msg)
     
-    return language
+    # Restart the script to apply the language change
+    print("🔄 Restarting to apply language change...")
+    
+    # Use subprocess to start a completely fresh process
+    # This ensures all modules are reloaded and environment is fresh
+    subprocess.run([sys.executable] + sys.argv)
+    sys.exit(0)
 
 def should_prompt_for_language() -> bool:
     """

@@ -4,9 +4,17 @@ import sys
 import requests
 
 from src.utils.validation import validate_config
-from docs.messages import INITIALIZATION_CONFIGURATION
 from src.services.anki_service import check_anki_connect
 from src.config import settings
+
+@pytest.fixture(autouse=True)
+def set_user_locale():
+    """Set USER_LOCALE to 'en' for all validation tests to avoid language prompts."""
+    os.environ['USER_LOCALE'] = 'en'
+    yield
+    # Clean up after test
+    if 'USER_LOCALE' in os.environ:
+        del os.environ['USER_LOCALE']
 
 # A valid config for use in tests
 def valid_config():

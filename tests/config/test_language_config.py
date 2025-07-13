@@ -76,16 +76,18 @@ class TestLanguageConfig:
     @patch('src.config.language_config.get_language_choice')
     @patch('src.config.language_config.save_language_to_env')
     @patch('builtins.print')
-    def test_configure_language(self, mock_print, mock_save, mock_choice):
+    @patch('subprocess.run')
+    def test_configure_language(self, mock_run, mock_print, mock_save, mock_choice):
         """Test configure_language function"""
         mock_choice.return_value = 'uk'
-        
-        result = configure_language()
-        
-        assert result == 'uk'
+        import pytest
+        with pytest.raises(SystemExit):
+            configure_language()
         mock_choice.assert_called_once()
         mock_save.assert_called_once_with('uk')  # Uses default .env parameter
-        mock_print.assert_called_once_with("✅ Language set to: Українська")
+        mock_print.assert_any_call("✅ Language set to: Українська")
+        mock_print.assert_any_call("🔄 Restarting to apply language change...")
+        mock_run.assert_called_once()
     
     @patch.dict(os.environ, {'USER_LOCALE': 'en'})
     def test_should_prompt_for_language_false(self):

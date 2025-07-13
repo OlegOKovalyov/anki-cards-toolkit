@@ -1,6 +1,6 @@
 import requests
 from typing import Optional, Any, Dict
-from docs.messages import GENERAL_ERRORS
+from src.locales.loader import get_message
 
 def get_api_data(
     url: str, 
@@ -26,17 +26,17 @@ def get_api_data(
         return response.json()
     except requests.exceptions.HTTPError as http_err:
         if response.status_code == 401:
-            print(GENERAL_ERRORS['auth'])
+            print(get_message("GENERAL_ERRORS.auth"))
         elif response.status_code == 429:
-            print(GENERAL_ERRORS['rate_limit'])
+            print(get_message("GENERAL_ERRORS.rate_limit"))
         else:
-            print(GENERAL_ERRORS['http_error'].format(error=http_err))
+            print(get_message("GENERAL_ERRORS.http_error", error=http_err))
     except requests.exceptions.ConnectionError:
-        print(GENERAL_ERRORS['connection'])
+        print(get_message("GENERAL_ERRORS.connection"))
     except requests.exceptions.Timeout:
-        print(GENERAL_ERRORS['timeout'])
+        print(get_message("GENERAL_ERRORS.timeout"))
     except requests.exceptions.RequestException as e:
-        print(GENERAL_ERRORS['request_error'].format(error=e))
+        print(get_message("GENERAL_ERRORS.request_error", error=e))
     except Exception as e:
-        print(GENERAL_ERRORS['unexpected'].format(error=e))
+        print(get_message("GENERAL_ERRORS.unexpected", error=e))
     return None 

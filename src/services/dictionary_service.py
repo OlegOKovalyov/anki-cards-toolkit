@@ -3,7 +3,7 @@
 import csv
 import sys
 from src.utils.api_client import get_api_data
-from docs.messages import DATA_GATHERING_PROCESSING
+from src.locales.loader import get_message
 from src.ui.html_templates import render_dictionary_html
 from src.services.cefr_data import CEFR_FREQUENCY_DATA
 from src.config.settings import DICTIONARY_API_URL, BIGHUGE_API_URL, BIG_HUGE_API_KEY
@@ -19,28 +19,28 @@ def format_dictionary_entry(data):
     try:
         return render_dictionary_html(data)
     except Exception as e:
-        print(DATA_GATHERING_PROCESSING["dict_format_error"].format(error=str(e)))
-        return DATA_GATHERING_PROCESSING["dict_format_generic"]
+        print(get_message("DATA_GATHERING_PROCESSING.dict_format_error", error=str(e)))
+        return get_message("DATA_GATHERING_PROCESSING.dict_format_generic")
 
 def _fetch_dictionary_api_data(word: str):
     """Fetch raw word data from the DictionaryAPI."""
     url = f"{DICTIONARY_API_URL}/{word}"
     data = get_api_data(url)
     if not data:
-        print(DATA_GATHERING_PROCESSING["dict_fetch_error"].format(word=word))
+        print(get_message("DATA_GATHERING_PROCESSING.dict_fetch_error", word=word))
         return None
     return data
 
 def _fetch_thesaurus_api_data(word: str):
     """Fetch raw thesaurus data from Big Huge Thesaurus."""
     if not BIG_HUGE_API_KEY:
-        print(DATA_GATHERING_PROCESSING["thesaurus_key_missing"])
+        print(get_message("DATA_GATHERING_PROCESSING.thesaurus_key_missing"))
         return None
     url = f"{BIGHUGE_API_URL}/{BIG_HUGE_API_KEY}/{word}/json"
-    print(DATA_GATHERING_PROCESSING["thesaurus_query"].format(word=word))
+    print(get_message("DATA_GATHERING_PROCESSING.thesaurus_query", word=word))
     data = get_api_data(url)
     if data:
-        print(DATA_GATHERING_PROCESSING["thesaurus_success"])
+        print(get_message("DATA_GATHERING_PROCESSING.thesaurus_success"))
     return data
 
 def _process_thesaurus_data(thesaurus_data, requested_pos=None):
@@ -88,7 +88,7 @@ def fetch_word_data(word: str, requested_pos: str = None):
     """
     dictionary_data = _fetch_dictionary_api_data(word)
     if not dictionary_data:
-        print(DATA_GATHERING_PROCESSING["dict_fetch_error"].format(word=word))
+        print(get_message("DATA_GATHERING_PROCESSING.dict_fetch_error", word=word))
         sys.exit(1)
 
     thesaurus_data = _fetch_thesaurus_api_data(word)
@@ -100,7 +100,7 @@ def fetch_word_data(word: str, requested_pos: str = None):
     elif isinstance(dictionary_data, list):
         entries = dictionary_data
     else:
-        print(DATA_GATHERING_PROCESSING["dict_invalid_format"])
+        print(get_message("DATA_GATHERING_PROCESSING.dict_invalid_format"))
         return None
 
     # Aggregate all meanings from all entries
@@ -115,7 +115,7 @@ def fetch_word_data(word: str, requested_pos: str = None):
                 target_meaning = m
                 break
         if not target_meaning:
-            print(DATA_GATHERING_PROCESSING["dict_pos_not_found"].format(requested_pos=requested_pos))
+            print(get_message("DATA_GATHERING_PROCESSING.dict_pos_not_found", requested_pos=requested_pos))
             target_meaning = all_meanings[0] if all_meanings else {}
     else:
         target_meaning = all_meanings[0] if all_meanings else {}

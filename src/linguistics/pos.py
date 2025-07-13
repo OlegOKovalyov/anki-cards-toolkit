@@ -8,7 +8,7 @@ import nltk
 from nltk import pos_tag, word_tokenize
 from nltk.stem import WordNetLemmatizer
 import re
-from docs.messages import USER_INTERACTION_INPUT_VALIDATION, DEVELOPER_NOTES
+from src.locales.loader import get_message
 
 # Add project root to path to allow absolute imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -65,7 +65,7 @@ def detect_pos_from_context(word, sentence):
         return 'noun'
 
     except Exception as e:
-        print(USER_INTERACTION_INPUT_VALIDATION["pos_detection_error"].format(error=str(e)))
+        print(get_message("USER_INTERACTION_INPUT_VALIDATION.pos_detection_error", error=str(e)))
         return _fallback_pos_detection(word, sentence)
 
 

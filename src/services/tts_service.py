@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 from gtts import gTTS
 import requests
-from docs.messages import TTS_ERRORS
+from src.locales.loader import get_message
 import sys
 
 def generate_tts_base64(text: str, filename_prefix: str, exit_on_error: bool = True) -> tuple[str | None, str | None]:
@@ -29,14 +29,14 @@ def generate_tts_base64(text: str, filename_prefix: str, exit_on_error: bool = T
         sound_ref = f"[sound:tts_{filename_prefix}.mp3]"
         return sound_ref, encoded_data
     except requests.exceptions.ConnectionError:
-        print(TTS_ERRORS['connection'])
+        print(get_message("TTS_ERRORS.connection"))
         if exit_on_error:
-            print(TTS_ERRORS['skip_card'])
+            print(get_message("TTS_ERRORS.skip_card"))
             sys.exit(1)
         return None, None
     except Exception as e:
-        print(TTS_ERRORS['generation'].format(error=str(e)))
+        print(get_message("TTS_ERRORS.generation", error=str(e)))
         if exit_on_error:
-            print(TTS_ERRORS['skip_card'])
+            print(get_message("TTS_ERRORS.skip_card"))
             sys.exit(1)
         return None, None 
