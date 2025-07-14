@@ -66,7 +66,6 @@ def select_image_for_card(word: str) -> str:
         print(get_message("IMAGE_SELECTION_MESSAGES.image_none_continue"))
         return ""
     print(get_message("IMAGE_SELECTION_MESSAGES.image_found_count", count=len(images)))
-    print(get_message("IMAGE_SELECTION_MESSAGES.preview_start", count=len(images)))
     html_content = create_image_selection_page(images, word)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as f:
         f.write(html_content)

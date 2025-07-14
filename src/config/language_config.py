@@ -66,9 +66,9 @@ def configure_language() -> str:
     # Restart the script to apply the language change
     print("🔄 Restarting to apply language change...")
     
-    # Use subprocess to start a completely fresh process
-    # This ensures all modules are reloaded and environment is fresh
-    subprocess.run([sys.executable] + sys.argv)
+    # Remove --set-language and -s from sys.argv before restarting
+    filtered_args = [arg for arg in sys.argv if arg not in ("--set-language", "-s")]
+    subprocess.run([sys.executable] + filtered_args)
     sys.exit(0)
 
 def should_prompt_for_language() -> bool:
