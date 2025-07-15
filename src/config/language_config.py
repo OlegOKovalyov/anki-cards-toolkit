@@ -6,22 +6,29 @@ from typing import Optional
 
 def get_language_choice() -> str:
     """
-    Prompt user to choose language and return the choice.
-    Returns 'en' or 'uk'.
+    Prompt user to choose language and return the selected language code.
+    Supports any number of languages defined in LANGUAGE_NAMES.
+    Returns the selected language code (e.g., 'en', 'uk', 'de', etc.).
     """
-    # Use direct message lookup to avoid recursion
+    from src.locales.language_map import LANGUAGE_NAMES
     from docs.messages import INITIALIZATION_CONFIGURATION
-    prompt_msg = INITIALIZATION_CONFIGURATION["language_prompt"]
-    invalid_msg = INITIALIZATION_CONFIGURATION["language_invalid_choice"]
     
+    # Dynamically build the options list
+    options = []
+    code_list = list(LANGUAGE_NAMES.keys())
+    for idx, code in enumerate(code_list, 1):
+        options.append(f"[{idx}] {LANGUAGE_NAMES[code]}")
+    options_str = "\n".join(options)
+    prompt_msg = INITIALIZATION_CONFIGURATION["language_prompt"].format(options=options_str)
+    invalid_msg = INITIALIZATION_CONFIGURATION["language_invalid_choice_dynamic"]
+
     while True:
         choice = input(prompt_msg).strip()
-        if choice == '1':
-            return 'en'
-        elif choice == '2':
-            return 'uk'
-        else:
-            print(invalid_msg, end='')
+        if choice.isdigit():
+            idx = int(choice) - 1
+            if 0 <= idx < len(code_list):
+                return code_list[idx]
+        print(invalid_msg, end='')
 
 def save_language_to_env(language: str, env_file: str = '.env') -> None:
     """
@@ -52,22 +59,18 @@ def save_language_to_env(language: str, env_file: str = '.env') -> None:
 def configure_language() -> str:
     """
     Configure language by prompting user and saving the choice.
-    Returns the selected language ('en' or 'uk').
+    Supports any number of languages defined in LANGUAGE_NAMES.
+    Returns the selected language code (e.g., 'en', 'uk', 'de', etc.).
     """
     language = get_language_choice()
     save_language_to_env(language)
     
     from src.locales.language_map import LANGUAGE_NAMES
     language_name = LANGUAGE_NAMES.get(language, "Unknown")
-    # Use direct message lookup to avoid recursion
     from docs.messages import INITIALIZATION_CONFIGURATION
     set_msg = INITIALIZATION_CONFIGURATION["language_set"].format(language=language_name)
     print(set_msg)
-    
-    # Restart the script to apply the language change
     print("🔄 Restarting to apply language change...")
-    
-    # Restart with only the script name (no arguments)
     subprocess.run([sys.executable, sys.argv[0]])
     sys.exit(0)
 

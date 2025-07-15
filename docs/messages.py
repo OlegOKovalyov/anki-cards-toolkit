@@ -12,8 +12,8 @@ INITIALIZATION_CONFIGURATION = {
     "big_huge_api_key_invalid": "BIG_HUGE_API_KEY must be exactly 32 characters long and contain no spaces.",
     "anki_connect_url_invalid": "ANKI_CONNECT_URL must be exactly 'http://localhost:8765'.",
     "config_file_invalid": "CONFIG_FILE must be exactly 'last_deck.txt'.",
-    "language_prompt": "Please choose your language / Будь ласка, оберіть мову:\n[1] English\n[2] Українська\n> ",
-    "language_invalid_choice": "❌ Invalid choice. Please enter 1 for English or 2 for Українська: ",
+    "language_prompt": "Please choose your language:\n{options}\n> ",
+    "language_invalid_choice_dynamic": "❌ Invalid choice. Please enter a valid number from the list: ",
     "language_set": "✅ Language set to: {language}"
 }
 

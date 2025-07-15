@@ -11,6 +11,16 @@ from src.config.language_config import (
     initialize_language_if_needed
 )
 
+import sys
+import types
+
+def mock_language_names(extra=None):
+    # Helper to patch LANGUAGE_NAMES with extra languages
+    base = {"en": "English", "uk": "Українська"}
+    if extra:
+        base.update(extra)
+    return base
+
 class TestLanguageConfig:
     
     @pytest.fixture
@@ -46,6 +56,16 @@ class TestLanguageConfig:
         assert result == 'en'
         assert mock_input.call_count == 2
         mock_print.assert_called_once()
+    
+    @patch('builtins.input')
+    def test_get_language_choice_dynamic(self, mock_input):
+        """Test language choice with more than two languages"""
+        from src.locales import language_map
+        with patch.dict(language_map.LANGUAGE_NAMES, {"de": "Deutsch"}):
+            mock_input.side_effect = ['3']  # Selects 'de'
+            result = get_language_choice()
+            assert result == 'de'
+            assert mock_input.call_count == 1
     
     def test_save_language_to_env_new_file(self, temp_env_file):
         """Test saving language to a new .env file"""
