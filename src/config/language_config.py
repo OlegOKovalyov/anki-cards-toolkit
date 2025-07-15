@@ -57,7 +57,8 @@ def configure_language() -> str:
     language = get_language_choice()
     save_language_to_env(language)
     
-    language_name = "English" if language == 'en' else "Українська"
+    from src.locales.language_map import LANGUAGE_NAMES
+    language_name = LANGUAGE_NAMES.get(language, "Unknown")
     # Use direct message lookup to avoid recursion
     from docs.messages import INITIALIZATION_CONFIGURATION
     set_msg = INITIALIZATION_CONFIGURATION["language_set"].format(language=language_name)
@@ -66,9 +67,8 @@ def configure_language() -> str:
     # Restart the script to apply the language change
     print("🔄 Restarting to apply language change...")
     
-    # Remove --set-language and -s from sys.argv before restarting
-    filtered_args = [arg for arg in sys.argv if arg not in ("--set-language", "-s")]
-    subprocess.run([sys.executable] + filtered_args)
+    # Restart with only the script name (no arguments)
+    subprocess.run([sys.executable, sys.argv[0]])
     sys.exit(0)
 
 def should_prompt_for_language() -> bool:

@@ -14,16 +14,28 @@ def parse_arguments():
 Examples:
   python3 generate_card.py                    # Run normally
   python3 generate_card.py --set-language     # Set/reset language preference
-        """
+  python3 generate_card.py -l                 # Set/reset language preference (short)
+        """,
+         allow_abbrev=False  # <---- IMPORTANT: Disallows partial matches
     )
     
     parser.add_argument(
-        '--set-language',
+        '--set-language', '-l',
         action='store_true',
         help='Set or reset the language preference (English/Ukrainian)'
     )
-    
-    return parser.parse_args()
+
+    def custom_error(message):
+        sys.stderr.write(f'\n❌ {message}\n')
+        parser.print_help(sys.stderr)
+        sys.exit(2)
+    parser.error = custom_error
+
+    try:
+        args = parser.parse_args()
+    except SystemExit as e:
+        sys.exit(e.code)
+    return args
 
 def handle_cli_arguments():
     """

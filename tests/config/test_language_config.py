@@ -81,11 +81,12 @@ class TestLanguageConfig:
         """Test configure_language function"""
         mock_choice.return_value = 'uk'
         import pytest
+        from src.locales.language_map import LANGUAGE_NAMES
         with pytest.raises(SystemExit):
             configure_language()
         mock_choice.assert_called_once()
         mock_save.assert_called_once_with('uk')  # Uses default .env parameter
-        mock_print.assert_any_call("✅ Language set to: Українська")
+        mock_print.assert_any_call(f"✅ Language set to: {LANGUAGE_NAMES['uk']}")
         mock_print.assert_any_call("🔄 Restarting to apply language change...")
         mock_run.assert_called_once()
     

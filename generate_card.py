@@ -1,5 +1,16 @@
 import sys
 from src.cli.args import handle_cli_arguments
+
+# =========================================================================
+# CLI ARGUMENT HANDLING (must be first, before any other imports)
+# =========================================================================
+
+if not handle_cli_arguments():
+    sys.exit(0)
+
+# =========================================================================
+# Delayed imports: only import after argument parsing is successful
+# =========================================================================
 from src.config.language_config import initialize_language_if_needed
 from src.utils.config_builder import config_build, get_default_deck_name
 from src.locales.loader import get_message
@@ -23,12 +34,6 @@ from src.ui.user_input import get_confirmed_pos
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
 # ============================================================================
-
-# ============================================================================
-# CLI ARGUMENT HANDLING
-# ============================================================================
-if not handle_cli_arguments():
-    sys.exit(0)
 
 # ============================================================================
 # LANGUAGE INITIALIZATION
