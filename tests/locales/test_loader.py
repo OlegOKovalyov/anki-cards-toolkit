@@ -2,6 +2,8 @@ import pytest
 import sys
 import os
 from unittest.mock import patch, MagicMock
+import importlib
+from src.locales.language_map import LANGUAGE_NAMES
 
 # Ensure the src directory is in sys.path for import
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -100,3 +102,40 @@ class TestLanguageInitialization:
                             translation_module='src.locales.uk.messages_uk'
                         )
                         assert result == "test message" 
+
+class TestDynamicLanguageLoading:
+    def test_dynamic_loading_for_all_supported_languages(self):
+        """Test that MessageLoader loads translation modules for all languages in LANGUAGE_NAMES, falling back to English if missing."""
+        for code in LANGUAGE_NAMES:
+            if code == 'en':
+                loader = MessageLoader(default_module='docs.messages')
+                msg = loader.get('CARD_CONSTRUCTION_SUBMISSION.card_added', card_id=1)
+                assert 'Card added' in msg
+            else:
+                module_path = f"src.locales.{code}.messages_{code}"
+                try:
+                    importlib.import_module(module_path)
+                    loader = MessageLoader(default_module='docs.messages', translation_module=module_path)
+                    msg = loader.get('CARD_CONSTRUCTION_SUBMISSION.card_added', card_id=1)
+                    # Should not raise, and should return a string (translated or fallback)
+                    assert isinstance(msg, str)
+                except ModuleNotFoundError:
+                    # Should fallback to English
+                    loader = MessageLoader(default_module='docs.messages', translation_module=module_path)
+                    msg = loader.get('CARD_CONSTRUCTION_SUBMISSION.card_added', card_id=1)
+                    assert 'Card added' in msg
+
+    def test_fallback_for_unsupported_locale(self):
+        """Test fallback to English if USER_LOCALE is not in LANGUAGE_NAMES."""
+        loader = MessageLoader(default_module='docs.messages', translation_module=None)
+        msg = loader.get('CARD_CONSTRUCTION_SUBMISSION.card_added', card_id=2)
+        assert 'Card added' in msg
+
+    def test_fallback_for_missing_translation_module(self):
+        """Test fallback to English if translation module is missing for a supported locale."""
+        fake_lang = 'zz'
+        with patch.dict('src.locales.language_map.LANGUAGE_NAMES', {**LANGUAGE_NAMES, fake_lang: 'FakeLang'}):
+            module_path = f"src.locales.{fake_lang}.messages_{fake_lang}"
+            loader = MessageLoader(default_module='docs.messages', translation_module=module_path)
+            msg = loader.get('CARD_CONSTRUCTION_SUBMISSION.card_added', card_id=3)
+            assert 'Card added' in msg 

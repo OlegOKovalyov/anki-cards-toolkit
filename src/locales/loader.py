@@ -2,6 +2,7 @@ import importlib
 import sys
 from typing import Any, Dict
 from src.config.settings import USER_LOCALE
+from src.locales.language_map import LANGUAGE_NAMES
 
 class MessageLoader:
     def __init__(self, default_module: str, translation_module: str = None):
@@ -11,7 +12,13 @@ class MessageLoader:
     def _load_module_dicts(self, module_path: str) -> Dict[str, Any]:
         if not module_path:
             return {}
-        module = importlib.import_module(module_path)
+        try:
+            module = importlib.import_module(module_path)
+        except ModuleNotFoundError:
+            return {}
+        except Exception as e:
+            print(f"Warning: Failed to load translation module '{module_path}': {e}")
+            return {}
         # Only load ALL_CAPS dicts
         return {k: v for k, v in vars(module).items() if k.isupper() and isinstance(v, dict)}
 
@@ -39,19 +46,24 @@ class MessageLoader:
                 return None
         return current
 
-# Determine translation module based on USER_LOCALE
-# If USER_LOCALE is empty, we'll handle it in the get_message function
-if USER_LOCALE == 'uk':
-    translation_module = 'src.locales.uk.messages_uk'
-elif USER_LOCALE == 'en':
-    translation_module = None
-else:
-    translation_module = None  # Default/fallback for unknown locales
+def _get_translation_module(locale: str) -> str:
+    if locale and locale in LANGUAGE_NAMES and locale != 'en':
+        module_path = f"src.locales.{locale}.messages_{locale}"
+        try:
+            importlib.import_module(module_path)
+            return module_path
+        except ModuleNotFoundError:
+            print(f"Warning: Translation module for locale '{locale}' not found. Falling back to English.")
+        except Exception as e:
+            print(f"Warning: Error loading translation module for locale '{locale}': {e}. Falling back to English.")
+    elif locale and locale not in LANGUAGE_NAMES:
+        print(f"Warning: Locale '{locale}' is not supported. Falling back to English.")
+    return None
 
 # Singleton/global loader and function
 _loader = MessageLoader(
     default_module='docs.messages',
-    translation_module=translation_module
+    translation_module=_get_translation_module(USER_LOCALE)
 )
 
 def get_message(key: str, **kwargs) -> str:
@@ -61,15 +73,9 @@ def get_message(key: str, **kwargs) -> str:
         initialize_language_if_needed()
         # Re-import settings to get updated USER_LOCALE
         from src.config.settings import USER_LOCALE as updated_locale
-        # Update the global loader with the correct translation module
         global _loader
-        if updated_locale == 'uk':
-            translation_module = 'src.locales.uk.messages_uk'
-        else:
-            translation_module = None
         _loader = MessageLoader(
             default_module='docs.messages',
-            translation_module=translation_module
+            translation_module=_get_translation_module(updated_locale)
         )
-    
     return _loader.get(key, **kwargs) 
