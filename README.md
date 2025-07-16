@@ -4,59 +4,132 @@
 
 ## 🧭 Project Overview
 
-This toolkit automates the creation of rich Anki flashcards for English vocabulary learning. It integrates pronunciation, imagery, CEFR level, and frequency ranking for focused memorization.
+**Anki Cards Toolkit** automates the creation of rich, bilingual Anki flashcards for effective English vocabulary memorization.  
+It combines audio pronunciation, imagery, CEFR level, frequency data, and synonym support in a single streamlined workflow.
 
-The core workflow:
-- Reads a sentence from the clipboard
-- Allows selecting a **focus word**
-- Automatically generates pronunciation audio (TTS)
-- Embeds a relevant image using Pexels free online media library
-- Adds CEFR level and frequency category next to the focus word
-- Outputs a ready-to-use HTML front and back template for the Anki card
+### Key features:
+- 🗣️ Generates pronunciation audio using TTS (Text-to-Speech)
+- 🖼️ Finds relevant images from the free Pexels library
+- 📈 Adds CEFR level and frequency category to the card
+- 📚 Fetches dictionary definitions and synonyms
+- 🌐 Multi-language user interface (English and Ukrainian supported)
+- 🧠 Focused word memorization from full sentence context
+- 📋 Automatically reads the sentence from the clipboard
+- ⚙️ Smart command-line interface with interactive prompts and robust error feedback
+- 🪄 Generates ready-to-use HTML front/back templates for Anki
+
+This tool is ideal for English learners and language autodidacts who want full control over the content of their vocabulary cards.
+
+## 📸 Screenshots
+
+Here’s what your flashcards will look like:
+
+**🔹 Front side**  
+Shows the sentence with the focus word highlighted and audio playback.
+
+![Front](docs/front-card-example.jpg)
+
+**🔸 Back side**  
+Includes:
+- The same sentence
+- Relevant image
+- Focus word with:
+  - Pronunciation & transcription
+  - CEFR level and frequency band
+  - Dictionary definition
+  - Synonyms, related/similar words, antonyms
+  - Ukrainian translation
+
+![Back](docs/back-card-example.jpg)  
+
+## 🧑‍💻 User Interaction Workflow
+
+This is what a typical interaction looks like when generating a new flashcard from a sentence:
+
+```bash
+(venv) $ python3 generate_card.py
+Enter deck name [Defaul]: 
+📋 Copied sentence:
+Roman history is the story of the Romans’ conquest of Italy and the entire Mediterranean world.
+Is it correct? [Press Enter to confirm or type again]: 
+
+🔤 Enter the word you want to study: conquest
+
+📝 Part of speech [noun] [Press Enter to confirm or change (noun/verb/adjective/adverb)]:
+
+🔍 Querying Big Huge Thesaurus for 'conquest'...
+✅ Received response from Big Huge Thesaurus
+
+🔍 Searching for relevant images...
+✅ Found 16 images — opening browser preview...
+
+🔢 Enter a number (1–16) or press Enter to skip: 6
+✅ Image selected successfully
+```
+
+![Image](docs/image-selection-preview.jpg)  
+
+```bash
+📝 Enter the Ukrainian translation:
+🔤 Enter translated words (separate with commas)): завоювання, підкорення
+
+📁 File tts_conquest.mp3 saved  
+📁 File tts_sentence_conquest.mp3 saved
+
+✅ Card added: ID = 1749913745076
+```
 
 
 ## 🔧 Installation
 
-Clone the repository and set up a virtual environment:
+To get started, clone the repository and set up a virtual environment:
+
+### 🐧 For Linux/macOS:
 
 ```bash
 git clone https://github.com/OlegOKovalyov/anki-cards-toolkit.git
 cd anki-cards-toolkit
+
+# Create and activate a virtual environment
 python3 -m venv venv
 source venv/bin/activate
+
+# Install project dependencies
 pip install -r requirements.txt
 ```
-> Make sure to activate the virtual environment every time you work on the project.
 
-### 🐉 Python Virtual Environment
-
-It is recommended to work in a virtual environment to keep dependencies isolated from your system Python.
-
-✅ Create a virtual environment:
+### 🪟 For Windows:
 ```bash
-python3 -m venv venv
-```
-✅ Activate the environment:
+git clone https://github.com/OlegOKovalyov/anki-cards-toolkit.git
+cd anki-cards-toolkit
 
-• Linux/macOS:
-```bash
-source venv/bin/activate
-```
-• Windows:
-
-```bash
+:: Create and activate a virtual environment
+python -m venv venv
 venv\Scripts\activate
+
+:: Install project dependencies
+pip install -r requirements.txt
 ```
-After activation, your terminal should show (venv) at the beginning of the prompt.
+> ✅ Tip: Make sure to activate the virtual environment each time you work on the project or run the app:
+```bash
+source venv/bin/activate      # on Linux/macOS
+venv\Scripts\activate         # on Windows
+```
 
-### 🔈 Generating Silent Audio for Flashcards
+> ℹ️ **Note:** After activating the virtual environment, your terminal prompt should look like this:
+> ```
+> (venv) user@machine:~/anki-cards-toolkit$
+> ```
+> This indicates that you're working inside the virtual environment.
 
-To enable a natural-sounding pause between the sentence and the target word in each flashcard's audio playback, you need to generate a silent audio file. Run the following script to create a 1-second silent MP3:
+#### 🔈 Generate 1-second Silent Audio
+
+To add a natural pause between sentence and word in the flashcard audio, run:
 
 ```bash
 python scripts/generate_silence.py
 ```
-This will generate a file named silence_1sec.mp3, which will be placed automatically into Anki’s media folder (typically located at ~/.local/share/Anki2/User 1/collection.media/ or similar, depending on your system). This file will be used as part of the audio sequence for each card.
+This will create a 1-second silent MP3 used automatically in all cards.
 
 ### 🔤 NLTK resources
 
@@ -67,78 +140,57 @@ After installing dependencies, run the following once:
 python scripts/install_nltk_data.py
 ```
 
-### 🔑 Pexels API Key (Optional, for image support)
-
-If you want to automatically fetch relevant images for your cards from Pexels.com, you need to obtain a free API key:
-
-1. Go to https://www.pexels.com/api/ and create an account (or log in).
-2. Click "**Get API Key**" and copy your personal key.
-3. Open the .env file and replace the placeholder value of your_pexels_api_key with your actual key:
-```py
-PEXELS_API_KEY = 'your_actual_pexels_api_key_here'
-```
-4. Save the file.
-💡 If you skip this step, image support will be disabled and your cards will be created without accompanying pictures.
-
-### 🔑 Get a Big Huge Thesaurus API Key
-
-This tool uses the Big Huge Thesaurus API to fetch synonyms, related terms, similar words, and antonyms for the selected vocabulary word.
-
-To use this functionality:
-
-1. Visit https://words.bighugelabs.com/site/api.
-2. Sign up or log in to your account.
-3. Generate a free API key (you will receive a string similar to 7d4eb...9ab01).
-4. Open the file generate_card.py.
-5. In the .env file, replace the placeholder your_big_huge_thesaurus_key with your actual API key:
-```py
-BIG_HUGE_API_KEY = 'your_api_key_here'  # Big Huge Thesaurus API key
-```
-Without this key, word associations (synonyms, antonyms, etc.) will not be retrieved.
-
 ### 🔐 Environment Configuration
 
-Before running the project, you need to create a `.env` file in the root directory.
+Before using the app, create a `.env` file in the project root with the following content:
 
-This file should contain the following settings:
-
-```
+```env
 MODEL_NAME=VocabCard_English_UA
 DECK_NAME=Default
 PEXELS_API_KEY=your_pexels_api_key
 BIG_HUGE_API_KEY=your_big_huge_thesaurus_key
 ANKI_CONNECT_URL=http://localhost:8765
 CONFIG_FILE=last_deck.txt
+USER_LOCALE=uk
 ```
+🗂️ The .env file is ignored by Git (via .gitignore) and must not be committed.
 
-> ⚠️ Do not include quotes around values.
+> 💬 USER_LOCALE controls interface language (uk, en, etc.).
+If not set, the app will ask you to choose a language on first launch.
 
-The `.env` file should not be committed to version control. It is ignored by `.gitignore` for security.
+🔧 Configuration is loaded using the python-dotenv package.
 
-The project uses the [`python-dotenv`](https://pypi.org/project/python-dotenv/) library to load this configuration.
+### 🔑 Enable Image Support (Pexels API)
 
+To automatically fetch images from [Pexels.com](https://www.pexels.com/api/):
 
-### 🔇 Optional: Generating a Custom Silence MP3
+1. Create a free account and get your API key.
+2. Add it to your `.env` file:
+   ```env
+   PEXELS_API_KEY=your_actual_pexels_api_key_here
 
-If you want to customize the duration of the pause, you can edit the script scripts/generate_silence.py by changing the duration_ms parameter, which is specified in milliseconds. For example:
+### 🔑 Enable Word Associations (Big Huge Thesaurus API)
 
-```py
-generate_silence(duration_ms=2000)  # creates a 2-second silence
-```
+To fetch synonyms and related words:
 
-You can run the script again after modifying the value to regenerate the file with the new duration.
+1. Get a free API key at [words.bighugelabs.com](https://words.bighugelabs.com/site/api).
+2. Add it to your `.env` file:
+   ```env
+   BIG_HUGE_API_KEY=your_api_key_here
 
-### 🧩 Using the Card Templates in Anki
+🧩 Using the Card Templates in Anki
 
-To ensure that the generated Anki flashcards are displayed correctly, the project includes two HTML template files located in the /templates directory:
+The project includes two HTML templates in /templates/:
+  - front_template.html — front side of the card
+  - back_template.html — back side of the card
 
-    front_template.html: Defines the front side of the flashcard.
+To use them in Anki:
+  1. In Anki, go to Browse → Cards (or press Ctrl+L)
+  2. Create a new card type (based on “Basic”)
+    🔒 **Important:** The card type name must be exactly `VocabCard_English_UA`
 
-    back_template.html: Defines the back side of the flashcard.
-
-These templates are intended for use with a custom card type in Anki. We recommend creating a new card type based on the default Basic type and naming it something like VocabCard_English_UA. You can do this by navigating to: Anki → Browse → Cards (Ctrl+L) → Front Template / Back Template. Copy the contents of front_template.html and back_template.html into the corresponding sections of your newly created card type.
-
->Note: The back_template.html file includes a short silent audio clip before playing the focus word’s audio. This is done by inserting the following block:
+  3. Copy the contents from the two files into the **Front Template** and **Back Template** tabs
+>💡 The back side includes a silent audio `[sound:silence_1sec.mp3]` to add a natural pause before the focus word:
 
 ```html
 <div style="display: none;">
@@ -146,263 +198,230 @@ These templates are intended for use with a custom card type in Anki. We recomme
   [sound:silence_1sec.mp3]
 </div>
 ```
-This allows for a natural pause between the sentence and the word pronunciation, improving listening and memorization.
 
-### ⚠️ Required Fields
+### ⚠️ Required Fields in Anki
 
-In addition to customizing the templates, you must manually create the following fields for your custom card type in Anki. Without these fields, the templates and generated data will not work correctly.
+Your custom card type `VocabCard_English_UA` must contain specific fields so the toolkit can insert all generated content correctly.
 
-Here is the full list of fields used by the project, in the recommended order:
+📋 **Create these fields** (in this order recommended by the project):
 
-1. `Front` *(default Basic field — keep it)*
-2. `Back` *(default Basic field — keep it)*
-3. `Sentence`
-4. `Sentence_Audio`
-5. `Definition`
-6. `Synonyms`
-7. `Related`
-8. `Similar`
-9. `Antonyms`
-10. `Sentence_Repeated`
-11. `Image`
-12. `Word`
-13. `Irregular_Forms` *(used only if the focus word is an irregular verb)*
-14. `Word_Audio`
-15. `Dictionary_Entry`
-16. `Translation_UA`
+1. `Word` *(⚠️ Should be first — required by Anki to avoid empty note errors)*
+2. `Sentence`
+3. `Sentence_Audio`
+4. `Definition`
+5. `Synonyms`
+6. `Related`
+7. `Similar`
+8. `Antonyms`
+9. `Sentence_Repeated`
+10. `Image`
+11. `Irregular_Forms` *(optional, for irregular verbs)*
+12. `Word_Audio`
+13. `Dictionary_Entry`
+14. `Translation_UA`
+15. `Front` *(Anki default — not used by this toolkit)*
+16. `Back` *(Anki default — not used by this toolkit)*
 
-To add these fields:
-1. Open Anki.
-2. Go to **Browse** → **Cards**.
-3. Click **Fields…**.
-4. Add each field manually in the order shown above.
+🛠️ **How to add fields**:
 
-Anki will automatically ignore empty fields when displaying cards, so optional content (such as `Irregular_Forms`) will not interfere with the card appearance.
+1. Open Anki → **Browse** → **Cards**  
+2. Click **Fields...**  
+3. Add fields manually in the listed order
 
-> ⚠️ Important:
-> When setting up the card fields in Anki (Browse → Card Types → VocabCard_English_UA → Fields), make sure that the first field in the >list >is one that is always filled, such as Word or Sentence.
-> Anki uses the first field to determine whether a note is empty. If this field is blank, the note will be rejected with the error:
-```
-cannot create note because it is empty
-```
-> Fields like Front or Back are often left empty in this toolkit and should not be placed first in the list. It would be best to put the focus word **Word** field as the first field.
-
+💡 **Tip:** Anki skips empty fields automatically, so optional data won’t break your templates.
 
 ### 🗂️ Deck Selection and Persistence
 
-Starting from version 1.0.0, the toolkit supports dynamic deck selection during card creation.  
-When generating a new card, the script will now:
+The toolkit lets you choose an Anki deck dynamically when creating a card.
 
-1. Prompt the user for a target Anki deck name. You have to type it manually because the sentence for the card is on the clipboard. You can't copy-paste it.
-2. Suggest the previously used deck as default (stored in `last_deck.txt`).
-3. Automatically create the deck if it does not exist.
+🧠 What happens:
 
-This allows you to group your flashcards by topic or lesson (e.g., `History - Chapter 01`, `English - Mood Food`) without modifying the script.
+1. You'll be asked to type the **Anki deck name** manually.
+2. The last used deck (stored in `last_deck.txt`) is suggested as default.
+3. If the deck doesn’t exist, it will be **created automatically**.
 
-💡 To skip retyping the same deck name each time, just press `Enter` — the previous name will be reused.
+💡 Just press `Enter` to reuse the previous deck name — perfect for batch card creation.
 
-## 📸 Screenshots
+Example deck names:
+- `English - Mood Food`
+- `History - Chapter 01`
 
-Below are examples of a vocabulary flashcard generated by the project:
 
-**Front side**: anki-cards-toolkit/docs/front-card-example.jpg - 
-Contains the sentence with the target word highlighted and audio playback.
-
-**Back side**: anki-cards-toolkit/docs/back-card-example.jpg -
-Includes the sentence again, an image, the target word, dictionary entry with transcription, definitions, synonyms, related, similar, antonyms, and a Ukrainian translation.
-
-## 🧑‍💻 User Interaction Workflow
-
-Here is a sample interaction between the user and the script:
+### 🔇 Optional: Generating a Custom Silence MP3
+By default, the app uses a 1-second silent MP3 for smooth audio playback.
+To change the pause duration, edit the scripts/generate_silence.py script:
+```py
+generate_silence(duration_ms=2000)  # ← 2 seconds
+```
+Then re-run the script to regenerate the file:
 ```bash
-(venv) olegkovalyov/anki-cards-toolkit$ python3 generate_card.py
-```
-```
-✅ Loaded CEFR/frequency data for 172782 words
-Введіть назву колоди [Chapter 6: The Word of Islam]: 
-📋 Скопійоване речення:
-Roman history is the story of the Romans’ conquest of Italy and the entire Mediterranean world.
-🔤 Введи слово, яке хочеш вивчати: conquest
-📝 Частина мови [noun] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: 
-🔍 Запит до Big Huge Thesaurus для слова 'conquest'...
-✅ Отримано відповідь від Big Huge Thesaurus
-📚 Доступні частини мови: noun
-📝 Знайдені зв'язки:
-   Synonyms: 8 слів
-   Приклад: conquering, subjection, subjugation, seduction, capture...
-🔍 Пошук відповідних зображень...
-
-🔍 Sending request to Pexels API...
-📡 Status code: 200
-✅ Found 6 images
-Знайдено 6 зображень. Відкриваю попередній перегляд у браузері...
-
-🔢 Введіть номер зображення (1–6) або натисніть Enter для пропуску: 2
-✅ Зображення успішно вибрано.
-📁 Файл tts_conquest.mp3 збережено
-📁 Файл tts_sentence_conquest.mp3 збережено
-
-📝 Введіть український переклад:
-🔤 Введіть слова перекладу (розділяйте комами): завоювання, підкорення
-✅ Картку додано: ID = 1749913745076
+python scripts/generate_silence.py
 ```
 
-## ▶️ Running the tool
+## ▶️ Running the Toolkit
 
-Before using this tool to generate Anki flashcards, make sure the following prerequisites are met:
+Before generating Anki flashcards, make sure everything is ready:
 
-### 1. Install Anki
+---
 
-Download and install the Anki application from the official website:  
+### 1️⃣ Install Anki
+
+Download and install Anki from the official site:  
 👉 https://apps.ankiweb.net/
 
-Anki must be running in the background while you use this script to send cards.
+🟢 **Important:** Anki must be running in the background during flashcard generation.
 
-### 2. Install the AnkiConnect Add-on
+---
 
-This tool uses [AnkiConnect](https://github.com/FooSoft/anki-connect) to communicate with the Anki app.
+### 2️⃣ Install AnkiConnect Add-on
 
-To install AnkiConnect:
+This toolkit communicates with Anki via [AnkiConnect](https://github.com/FooSoft/anki-connect).
 
+📦 To install:
 1. Open Anki
-2. Go to `Tools` → `Add-ons` → `Get Add-ons…`
-3. Paste the following code:  
-   `2055492159`
-4. Click "OK" and restart Anki
+2. Go to `Tools → Add-ons → Get Add-ons…`
+3. Paste this code: `2055492159`
+4. Click OK and restart Anki
 
-After installation, AnkiConnect will automatically listen for connections at `http://localhost:8765`.
+🟢 After installation, AnkiConnect listens at `http://localhost:8765`
 
-### 3. Make Sure Anki is Running
+---
 
-Before launching the `generate_card.py` script, ensure that:
+### 3️⃣ Launch the Toolkit
+
+Make sure:
 - Anki is running
-- AnkiConnect is enabled
-- You are connected to the internet (for dictionary and image lookups)
+- AnkiConnect is installed and enabled
+- You’re connected to the internet
 
-If Anki is not running or AnkiConnect is not installed, the script will fail with a `ConnectionRefusedError`.
+Then run:
 
 ```bash
-source venv/bin/activate
+source venv/bin/activate  # or venv\Scripts\activate.bat on Windows
 python generate_card.py
 ```
-## 🌐 Internet Usage, Anki Profile, Audio & Images
 
-This project is designed to work **online**. An active internet connection is required for the following features:
-- Fetching word definitions, synonyms, and related words from the Big Huge Thesaurus API
-- Retrieving image suggestions from [Pexels](https://www.pexels.com/)
-- Text-to-Speech (TTS) audio generation
+## 🌍 Set the Language (Optional)
+
+You can choose the interface language (English or Ukrainian) using:
+```bash
+python generate_card.py --set-language
+```
+Or the short version:
+```bash
+python generate_card.py -l
+```
+> If the language is not set, the app will prompt you to choose one on the first launch.
+
+Your preference will be saved in the .env file as USER_LOCALE.
+
+## 🌐 Internet Access, Anki Profile & Media Storage
+
+This toolkit requires an **active internet connection** to:
+- Get synonyms and definitions (Big Huge Thesaurus)
+- Fetch images (Pexels)
+- Generate audio (TTS)
+
+---
 
 ### 👤 Anki Profile: `User 1`
 
-By default, when Anki is installed and launched for the first time, it automatically creates a profile named **`User 1`**.  
-All generated media files (images, audio, etc.) will be stored under this profile in the following directory:
+By default, Anki uses a profile called **User 1**.  
+All media (audio, images, silence) is saved in:
 
-• Linux/macOS::
+• **Linux/macOS**:  
 ```bash
 ~/.local/share/Anki2/User 1/
 ```
-
-• Windows:
+• **Windows**: 
 ```bash
 C:\Users\<YourUsername>\AppData\Roaming\Anki2\User 1\
 ```
-If you change your Anki profile name, the directory will also change. To rename or manage profiles, refer to the official Anki documentation on profiles. This toolkit assumes the default profile User 1 is used.
+> 💡 If you rename your profile in Anki, the folder name will change accordingly.
 
-### 🔉 Local Audio Generation (TTS)
+### 🔉 TTS Audio Generation
 
-The application uses Text-to-Speech (TTS) technology to generate audio files for:
+The tool uses **gTTS (Google Text-to-Speech)** to generate two audio files per card:
+- `tts_<word>.mp3`
+- `tts_sentence_<word>.mp3`
 
-- the vocabulary word
-- the example sentence
-
-> TTS is a system that converts written text into spoken audio.
-> In this project, audio is generated using the gTTS (Google Text-to-Speech) Python library.
-
-Two audio files are created for each card:
-
-- tts_<word>.mp3
-- tts_sentence_<word>.mp3
-
-They are saved locally to:
+🗂️ Saved to Anki's media folder:
 ```bash
 ~/.local/share/Anki2/User 1/collection.media/
 ```
-If a card is deleted or replaced, audio files may temporarily move to:
+🗑️ If a card is deleted or updated, audio may be moved to:
 ```bash
 ~/.local/share/Anki2/User 1/collection.media/media.trash/
 ```
 
-### 🖼️ Online Image Embedding from Pexels
+### 🖼️ Image Integration via Pexels
 
-Images are embedded into Anki cards using direct URLs from the Pexels image platform.
-Images are not downloaded or stored locally. For example:
+Anki cards display images using **direct links** from [Pexels](https://www.pexels.com/).  
+Images are **not downloaded**, only embedded via URL.
+
+💡 This means:
+- No local storage is used
+- Internet is required during card review
+
+Example snippet:
 ```html
-<div style="width: 250px; height: 250px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-    <img src="https://images.pexels.com/photos/946337/pexels-photo-946337.jpeg?auto=compress&amp;cs=tinysrgb&amp;h=350" style="width: 100%; height: 100%; object-fit: contain;">
-</div>
+<img src="https://images.pexels.com/..." style="width:100%; height:100%; object-fit:contain;">
 ```
-Since images are loaded from external sources, an active internet connection is required to display them during card reviews in Anki.
 
-### ✏️ Manually Replacing Images
+### ✏️ Replacing Images Manually
 
-If you are not satisfied with the automatically chosen image, you can manually replace it:
-1. Open Anki and locate the card.
-2. Click Edit to open the card content.
-3. Replace the current <img src="..."> tag with any other publicly accessible image URL to the question mark.
-• For example:
+Unsatisfied with the auto-selected image?
+
+You can easily change it in Anki:
+
+1. Open the card in **Edit** mode.
+2. Replace the `<img src="...">` link with any valid image URL.
+
+Example:
 ```html
-<img src="https://www.example.com/your-custom-image.png">
+<img src="https://example.com/custom-image.png">
 ```
-Your custom image will now be shown in reviews instead of the original Pexels image.
+> ✅ Your image will now be shown during flashcard reviews.
 
-## 🧠 CEFR & Frequency integration
+## 🧠 CEFR & Frequency Integration
 
-The project supports adding both CEFR levels (A1–C2) and word frequency category (1–9) to each word used in the flashcard. The relevant merged dataset is stored in data/merged_cefr_frequency.csv and is used by the card generation script to enrich flashcards with this metadata.
+Each word in your flashcards is enriched with:
 
-To regenerate or update this merged file (e.g. if the source CSVs change), use the script merge_cefr_and_frequency.py located in data/. This script combines CEFR and frequency information into a single file.
+- **CEFR level** (A1–C2)
+- **Frequency category** (1–9)
 
-The input CSVs required for this are:
+This data comes from a merged file: `data/merged_cefr_frequency.csv`.
+It is used automatically during card creation.
 
-    data/word_list_cefr.csv
+### 📁 How the data is built
 
-    data/valid_words_sorted_by_frequency.csv
+The merged file is created from two open-source CSVs:
 
-These files were obtained from the open-source project:
+- `word_list_cefr.csv`
+- `valid_words_sorted_by_frequency.csv`
 
-Maximax67 / Words-CEFR-Dataset
-GitHub link: https://github.com/Maximax67/Words-CEFR-Dataset/tree/main
-Author: Bielikov Maksym
+Source:  
+[Maximax67 / Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset)
 
-We thank the author for providing this valuable dataset under a permissive open-source license.
-According to the license, data from this repository may be reused, modified, and distributed with attribution.
-
-To manually download these files if not present:
+To regenerate the merged file:
 
 ```bash
 cd data/
 wget https://raw.githubusercontent.com/Maximax67/Words-CEFR-Dataset/main/csv/word_list_cefr.csv
 wget https://raw.githubusercontent.com/Maximax67/Words-CEFR-Dataset/main/csv/valid_words_sorted_by_frequency.csv
-```
-
-Then run:
-
-```bash
 python3 merge_cefr_and_frequency.py
 ```
 
-The script will generate merged_cefr_frequency.csv with the structure:
+🧮 Output format
 
-```csv
+```cs
 Word,CEFR,Frequency
 abandon,B2,4
 about,A1,2
 acquaintance,?,6
 ```
-Where:
-
-    CEFR is the Common European Framework level (A1–C2) or ? if not found
-
-    Frequency is a category from 1 (most frequent) to 9 (least frequent), calculated based on a 172,000-word frequency list using the following ranges:
+- CEFR: A1–C2 or ? if not found
+- Frequency: Category from 1 (most frequent) to 9 (rare)
 
 | Category | Frequency Range     |
 | -------- | ------------------- |
@@ -416,10 +435,8 @@ Where:
 | 8        | 800,000 – 3,000,000 |
 | 9        | 3,000,000 and above |
 
-The merge_cefr_and_frequency.py script is designed to be run from within the data/ directory and expects the two CSV files to be located in the same folder.    
-
-Note: the input CSV files and the script for merging are intended to be kept in the local repository only and are not committed to GitHub. Only the generated merged_cefr_frequency.csv is stored in the repository. The source CSVs and merging script are kept locally and excluded from version control.
-
+> ⚠️ Only the final merged file is committed to the repo.
+Source CSVs and merging script are kept locally (not versioned).
 
 # 📘 Best Practices for Using This Toolkit with Anki
 
@@ -427,71 +444,55 @@ To make the most of your vocabulary learning with Anki and this toolkit, conside
 
 ## 🧱 Card Creation Guidelines
 
-1. Start by **copying a sentence** to the clipboard from any learning source — such as a textbook, PDF, movie, TV series, podcast, or article.
+1. 📋 **Copy a sentence** to your clipboard from any source: textbook, article, video, podcast, etc.
 
-2. Then run the script from the terminal. It will first **prompt you to enter a deck name**:
+2. ▶️ **Run the script**:
+   ```bash
+   python3 generate_card.py
+   ``` 
+3. 🗂️ Enter the deck name:
+    - Press Enter to reuse the previous deck
+    - Or type a new one manually
+    > ⚠️ Do not copy the deck name — the clipboard should contain only the sentence.
 
-   • If you press Enter, it will use the last deck name you entered.
+4. 🎯 Choose your focus word — the one you want to learn.
+5. 🧠 The toolkit builds a flashcard using the VocabCard_English_UA type, with:
+    - Sentence (with TTS audio)
+    - Focus word (with translation, definition, CEFR & frequency)
+    - Synonyms, antonyms, related words
+    - Image (optional)
+    - Word and sentence audio (with pause)
 
-   • If you're starting a new topic, type the new deck name manually.
+🔖 Example Deck Names
 
-   • **Important:** After copying a sentence, do **not copy anything else** (like the deck name) — or the script will pick up the wrong text. Always type the deck name manually.
-
-3. The script will then display the sentence you copied and ask you to **enter the focus word** (the word you're learning from that sentence).
-
-4. Cards are generated using the predefined note type VocabCard_English_UA, which includes:
-
-        The full sentence
-
-        Word translation and definition
-
-        CEFR level and frequency
-
-        Audio and silence gap
-
-🗂 Examples of deck names:
-
-        English File - Intermediate - Unit 2
-
-        Movie - The Matrix
-
-        TV Series - Breaking Bad
-
-        Podcast - VOA Learning English
-
-        History - Chapter 03 - Ancient Egypt
-
-Organizing decks by source makes it easier to review contextually and stay focused.
+Group flashcards by topic or source for better review:
+- English File – Unit 2
+- TV Series – Breaking Bad
+- History – Ancient Egypt
+- Podcast – VOA Learning English
+- Movie – The Matrix
 
 ## ✅ Card Review Strategy
 
-1. In Anki, click "**Study Now**" to review cards from your chosen deck.
+1. ▶️ In Anki, click **"Study Now"** to begin reviewing your deck.
+2. 📖 Read the sentence, recall the focus word’s meaning, then click **"Show Answer"**.
+3. 🧠 Rate your recall:
+   - 🔁 **Again** – you forgot or struggled
+   - 😬 **Hard** – barely remembered
+   - 🙂 **Good** – recalled with effort
+   - 😎 **Easy** – instant and effortless
 
-2. After reading the sentence and recalling or checking the meaning of the target word, click "**Show Answer**".
-
-3.  Then evaluate your recall accuracy by selecting:
-
-    **Again** if you forgot the word or struggled
-
-    **Hard** if you barely remembered
-
-    **Good** if you recalled it correctly with some effort
-
-    **Easy** if it was instant and effortless
-
-This feedback helps Anki’s spaced repetition algorithm optimize your future reviews.
+Anki will schedule future reviews using spaced repetition based on your response.
 
 ## 🔁 How Often to Create and Review
 
-• Aim to generate **5–10 new cards per day**.
-
-• Review your **due cards daily**, even if no new cards are added.
-
-• Focus on quality over quantity: meaningful, real-world context matters more than isolated words.
-
+- 📅 Add **5–10 new cards per day** for steady progress.
+- 🔄 Review **due cards daily**, even if you skip adding new ones.
+- 🎯 Prioritize meaningful sentences over memorizing single words.
 
 ## 📜 License
 
-This project is distributed under the MIT License. See LICENSE for more information.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
-Data provided by Maximax67/Words-CEFR-Dataset is used under the terms of its original license, with thanks to the author.
+CEFR & frequency data by **Maximax67/Words-CEFR-Dataset** is used with attribution under its open license — with thanks to the author.
+

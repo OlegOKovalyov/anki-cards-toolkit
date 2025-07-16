@@ -119,6 +119,7 @@ irregular_verbs = {
     "split": ["split", "split", "split"],
     "spoil": ["spoil", "spoilt", "spoilt"],
     "spread": ["spread", "spread", "spread"],
+    "spring": ["spring", "sprang", "sprung"],
     "stand": ["stand", "stood", "stood"],
     "steal": ["steal", "stole", "stolen"],
     "stick": ["stick", "stuck", "stuck"],
