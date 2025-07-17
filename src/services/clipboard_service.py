@@ -4,6 +4,7 @@ import pyperclip
 import re
 import sys
 from src.locales.loader import get_message
+from src.cli.colors import cyan
 
 def get_clean_sentence_from_clipboard():
     """
@@ -35,9 +36,10 @@ def get_clean_sentence_from_clipboard():
         return sentence.strip()
 
     clipboard_sentence = clean(pyperclip.paste())
+#    clipboard_sentence = cyan(clipboard_sentence)
 
     if clipboard_sentence:
-        user_input = input(get_message("USER_INTERACTION_INPUT_VALIDATION.clipboard_sentence_prompt", clipboard_sentence=clipboard_sentence)).strip()
+        user_input = input(get_message("USER_INTERACTION_INPUT_VALIDATION.clipboard_sentence_prompt", clipboard_sentence=cyan(clipboard_sentence))).strip()
         if user_input:
             sentence = user_input.strip()
         else:

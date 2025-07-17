@@ -42,6 +42,8 @@ This tool is ideal for English learners and language autodidacts who want full c
   - [➤ Launch the Toolkit](#-launch-the-toolkit)
   - [➤ Image Integration via Pexels](#-image-integration-via-pexels)
   - [➤ Replacing Images Manually](#-replacing-images-manually)
+  - [➤ Duplicate Card Detection](#-duplicate-card-detection)
+  - [➤ Interrupting the Process](#-interrupting-the-process)
 - [🌐 Set the Language (Optional)](#-set-the-language-optional)
 - [📡 Internet Access, Anki Profile & Media Storage](#-internet-access-anki-profile--media-storage)
   - [➤ Anki Profile: `User 1`](#-anki-profile-user-1)
@@ -417,6 +419,15 @@ Example:
 <img src="https://example.com/custom-image.png">
 ```
 > ✅ Your image will now be shown during flashcard reviews.
+
+### ➤ Duplicate Card Detection
+
+> ❗ If you enter a focus word that already exists as the front side of a card in any deck, Anki will prevent the creation of a duplicate card and return an error. This is default behavior of AnkiConnect to avoid unintended duplicates across your entire collection.
+
+### ➤ Interrupting the Process
+
+> ❗ If at any point something goes wrong — e.g., you mistakenly enter a focus word instead of confirming the sentence — you can safely stop the process with `Ctrl+C`. This allows you to restart from the beginning without creating a broken or incomplete card.
+
 
 ## 📊 CEFR & Frequency Integration
 
