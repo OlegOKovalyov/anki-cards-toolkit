@@ -1,10 +1,10 @@
-# 🃏 anki-cards-toolkit
+# 🃏 AnkiCardsToolkit
 
 <img src="https://raw.githubusercontent.com/OlegOKovalyov/anki-cards-toolkit/main/anki-flashcard.png" alt="Anki Flashcard Toolkit Logo" width="200"/>
 
 ## 🧭 Project Overview
 
-**Anki Cards Toolkit** automates the creation of rich, bilingual Anki flashcards for effective English vocabulary memorization.  
+**AnkiCardsToolkit** automates the creation of rich, bilingual Anki flashcards for effective English vocabulary memorization.  
 It combines audio pronunciation, imagery, CEFR level, frequency data, and synonym support in a single streamlined workflow.
 
 ## ✨ Key features:

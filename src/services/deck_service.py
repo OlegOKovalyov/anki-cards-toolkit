@@ -2,6 +2,7 @@ import os
 import requests
 from src.locales.loader import get_message
 from src.config import settings
+from version import __version__
 
 CONFIG_FILE = settings.CONFIG_FILE
 ANKI_CONNECT_URL = settings.ANKI_CONNECT_URL
@@ -17,6 +18,7 @@ def save_last_deck(deck_name):
         f.write(deck_name.strip())
 
 def get_deck_name():
+    print(get_message("USER_INTERACTION_INPUT_VALIDATION.about_message", version=__version__))
     last_deck = load_last_deck()
     user_input = input(get_message("USER_INTERACTION_INPUT_VALIDATION.deck_name_prompt", last_deck=last_deck)).strip()
     deck = user_input if user_input else last_deck

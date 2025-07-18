@@ -43,7 +43,8 @@ USER_INTERACTION_INPUT_VALIDATION = {
     "pos_detection_error": "⚠️ Помилка при визначенні частини мови: {error}",
     # Word and POS prompts (from user_messages.py)
     "word_prompt": "🔤 Введи слово, яке хочеш вивчати: ",
-    "pos_prompt": "📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: "
+    "pos_prompt": "📝 Частина мови [{detected_pos}] [Натисни Enter для підтвердження або поміняй (noun/verb/adjective/adverb)]: ",
+    "about_message": "🃏 AnkiCardsToolkit v{version} від Олега Ковальова - Створюйте картку Anki зі слова у вашому реченні\n"
 }
 
 # STEP 4: DATA GATHERING & PROCESSING

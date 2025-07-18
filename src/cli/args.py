@@ -1,6 +1,7 @@
 import argparse
 import sys
 from src.config.language_config import configure_language
+from version import __version__
 
 def parse_arguments():
     """
@@ -8,7 +9,7 @@ def parse_arguments():
     Returns the parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        description='Anki Cards Toolkit - Create flashcards with rich content',
+        description=f'🃏 AnkiCardsToolkit v{__version__} - Create flashcard with rich content (by Oleg Kovalyov)',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

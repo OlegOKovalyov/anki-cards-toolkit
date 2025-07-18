@@ -46,7 +46,8 @@ USER_INTERACTION_INPUT_VALIDATION = {
     "pos_detection_error": "⚠️ Error detecting part of speech: {error}",
     # Word and POS prompts
     "word_prompt": "🔤 Enter the word you want to study: ",
-    "pos_prompt": "📝 Part of speech [{detected_pos}] [Press Enter to confirm or change (noun/verb/adjective/adverb)]: "
+    "pos_prompt": "📝 Part of speech [{detected_pos}] [Press Enter to confirm or change (noun/verb/adjective/adverb)]: ",
+    "about_message": "🃏 AnkiCardsToolkit v{version} by Oleg Kovalyov - Create Anki flashcard with word from your sentence\n"
 }
 
 # STEP 4: DATA GATHERING & PROCESSING
