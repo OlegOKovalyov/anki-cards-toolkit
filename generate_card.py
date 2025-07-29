@@ -1,16 +1,16 @@
+import os
 import sys
 from src.cli.args import handle_cli_arguments
 
-# =========================================================================
-# CLI ARGUMENT HANDLING (must be first, before any other imports)
-# =========================================================================
+# Minimal venv and .env check before any other imports
+if "VIRTUAL_ENV" not in os.environ:
+    print("⚠️  Virtual environment is not activated. Please run:\n   source venv/bin/activate\nThis script requires an active Python virtual environment for correct operation.")
+    sys.exit(1)
+if not os.path.exists(".env"):
+    print("⚠️  .env file is missing in the project root. Please create it with the following content as an example:\nMODEL_NAME=VocabCard_English_UA\nDECK_NAME=Default\nPEXELS_API_KEY=your_pexels_api_key\nBIG_HUGE_API_KEY=your_big_huge_thesaurus_key\nANKI_CONNECT_URL=http://localhost:8765\nCONFIG_FILE=last_deck.txt\nTTS_PROVIDER=gtts\nUSER_LOCALE=uk")
+    sys.exit(1)
 
-if not handle_cli_arguments():
-    sys.exit(0)
-
-# =========================================================================
-# Delayed imports: only import after argument parsing is successful
-# =========================================================================
+# Now import the rest of your app
 from src.config.language_config import initialize_language_if_needed
 from src.utils.config_builder import config_build, get_default_deck_name
 from src.locales.loader import get_message
@@ -30,6 +30,17 @@ from src.utils.validation import validate_config
 from src.utils.note_builder import build_anki_note
 from src.utils.note_builder import submit_note_to_anki
 from src.ui.user_input import get_confirmed_pos
+
+# =========================================================================
+# CLI ARGUMENT HANDLING (must be first, before any other imports)
+# =========================================================================
+
+if not handle_cli_arguments():
+    sys.exit(0)
+
+# =========================================================================
+# Delayed imports: only import after argument parsing is successful
+# =========================================================================
 
 # ============================================================================
 # STEP 1: INITIALIZATION & CONFIGURATION
