@@ -1,10 +1,37 @@
 """A service for uploading media files to AnkiConnect."""
 
+import os
+import shutil
 import requests
 from src.locales.loader import get_message
 from src.config import settings
 
 ANKI_CONNECT_URL = settings.ANKI_CONNECT_URL
+
+def move_old_media_to_trash_if_exists(filename: str) -> None:
+    """
+    Moves an existing media file to the Anki trash folder before overwriting.
+    
+    Args:
+        filename (str): The name of the file to potentially move to trash.
+    """
+    # Anki media and trash paths (assuming User 1 profile)
+    media_dir = os.path.expanduser("~/.local/share/Anki2/User 1/collection.media")
+    trash_dir = os.path.expanduser("~/.local/share/Anki2/User 1/media.trash")
+    
+    # Check if the file exists in the media directory
+    media_file_path = os.path.join(media_dir, filename)
+    if os.path.exists(media_file_path):
+        # Ensure trash directory exists
+        os.makedirs(trash_dir, exist_ok=True)
+        
+        # Move the file to trash
+        trash_file_path = os.path.join(trash_dir, filename)
+        try:
+            shutil.move(media_file_path, trash_file_path)
+        except Exception as e:
+            # If moving fails, just log it but don't stop the process
+            print(f"Warning: Could not move {filename} to trash: {e}")
 
 def send_media_file(name: str, b64_data: str) -> bool:
     """
@@ -19,6 +46,10 @@ def send_media_file(name: str, b64_data: str) -> bool:
     """
     if not b64_data:
         return False
+    
+    # Move existing file to trash before overwriting
+    move_old_media_to_trash_if_exists(name)
+    
     payload = {
         "action": "storeMediaFile",
         "version": 6,
