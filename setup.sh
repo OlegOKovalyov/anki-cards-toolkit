@@ -80,12 +80,154 @@ check_python_version() {
 # Function to check if virtual environment exists
 check_venv() {
     if [[ -d "$VENV_DIR" ]]; then
-        print_success "Virtual environment 'venv' already exists"
+        print_success "Virtual environment '$VENV_DIR' already exists"
         return 0
     else
-        print_info "Virtual environment 'venv' not found"
+        print_info "Virtual environment '$VENV_DIR' not found"
         return 1
     fi
+}
+
+# Function to check for required tools
+check_required_tools() {
+    local missing_tools=()
+    
+    if ! command -v pip3 >/dev/null 2>&1 && ! command -v pip >/dev/null 2>&1; then
+        missing_tools+=("pip")
+    fi
+    
+    if ! command -v git >/dev/null 2>&1; then
+        missing_tools+=("git")
+    fi
+    
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        local tools_list=$(IFS=", " ; echo "${missing_tools[*]}")
+        if [[ "$1" == "dry_run" ]]; then
+            print_warning "Missing required tools: $tools_list"
+        else
+            print_error "Missing required tools: $tools_list"
+            print_error "Please install the missing tools and run the setup script again."
+            exit 1
+        fi
+        return 1
+    else
+        print_success "All required tools found (pip, git)"
+        return 0
+    fi
+}
+
+# Function to install dependencies
+install_dependencies() {
+    if [[ "$1" == "dry_run" ]]; then
+        print_dry_run "Would install dependencies from requirements.txt"
+        return 0
+    fi
+    
+    print_info "Installing dependencies from requirements.txt..."
+    if [[ -d "$VENV_DIR" ]]; then
+        source "$VENV_DIR/bin/activate"
+        pip install -r requirements.txt
+        print_success "Dependencies installed successfully"
+    else
+        print_error "Virtual environment not found. Please create it first."
+        return 1
+    fi
+}
+
+# Function to install NLTK data
+install_nltk_data() {
+    if [[ "$1" == "dry_run" ]]; then
+        print_dry_run "Would install NLTK data using scripts/install_nltk_data.py"
+        return 0
+    fi
+    
+    print_info "Installing NLTK data..."
+    if [[ -d "$VENV_DIR" ]]; then
+        source "$VENV_DIR/bin/activate"
+        python3 scripts/install_nltk_data.py
+        print_success "NLTK data installed successfully"
+    else
+        print_error "Virtual environment not found. Please create it first."
+        return 1
+    fi
+}
+
+# Function to prompt for API keys
+prompt_for_api_keys() {
+    local pexels_key=""
+    local thesaurus_key=""
+    
+    if [[ "$1" == "dry_run" ]]; then
+        print_dry_run "Would prompt for PEXELS_API_KEY"
+        print_dry_run "Would prompt for BIG_HUGE_API_KEY"
+        return 0
+    fi
+    
+    echo
+    print_info "API Keys Configuration"
+    echo "You'll need API keys for image search and word associations."
+    echo
+    
+    # Pexels API Key
+    while [[ -z "$pexels_key" ]]; do
+        read -p "Enter your Pexels API key (or press Enter to skip): " pexels_key
+        if [[ -z "$pexels_key" ]]; then
+            print_warning "Pexels API key skipped. Image search will not be available."
+            pexels_key="your_pexels_api_key"
+            break
+        fi
+    done
+    
+    # Big Huge Thesaurus API Key
+    while [[ -z "$thesaurus_key" ]]; do
+        read -p "Enter your Big Huge Thesaurus API key (or press Enter to skip): " thesaurus_key
+        if [[ -z "$thesaurus_key" ]]; then
+            print_warning "Big Huge Thesaurus API key skipped. Word associations will not be available."
+            thesaurus_key="your_big_huge_thesaurus_key"
+            break
+        fi
+    done
+    
+    # Store keys for .env file creation
+    PEXELS_API_KEY="$pexels_key"
+    BIG_HUGE_API_KEY="$thesaurus_key"
+}
+
+# Function to create .env file
+create_env_file() {
+    if [[ "$1" == "dry_run" ]]; then
+        print_dry_run "Would create .env file with API keys and configuration"
+        return 0
+    fi
+    
+    if [[ -f ".env" ]]; then
+        print_warning ".env file already exists. Backing up to .env.backup"
+        cp .env .env.backup
+    fi
+    
+    print_info "Creating .env file..."
+    cat > .env << EOF
+# AnkiCardsToolkit Environment Configuration
+# This file contains API keys and configuration settings
+
+# Anki Configuration
+MODEL_NAME=VocabCard_English_UA
+DECK_NAME=Default
+ANKI_CONNECT_URL=http://localhost:8765
+CONFIG_FILE=last_deck.txt
+
+# API Keys
+PEXELS_API_KEY=$PEXELS_API_KEY
+BIG_HUGE_API_KEY=$BIG_HUGE_API_KEY
+
+# TTS Configuration
+TTS_PROVIDER=gtts
+
+# User Interface
+USER_LOCALE=uk
+EOF
+    
+    print_success ".env file created successfully"
 }
 
 # Function to show what would be done in dry run
@@ -97,7 +239,7 @@ show_dry_run_plan() {
     fi
     
     if ! check_venv >/dev/null 2>&1; then
-        print_dry_run "  - Create virtual environment 'venv'"
+        print_dry_run "  - Create virtual environment '$VENV_DIR'"
         print_dry_run "  - Activate virtual environment"
         print_dry_run "  - Install dependencies from requirements.txt"
     else
@@ -105,9 +247,9 @@ show_dry_run_plan() {
         print_dry_run "  - Install/update dependencies from requirements.txt"
     fi
     
-    print_dry_run "  - Generate 1-second silent audio file"
     print_dry_run "  - Install NLTK data"
-    print_dry_run "  - Create .env file template"
+    print_dry_run "  - Prompt for API keys (Pexels, Big Huge Thesaurus)"
+    print_dry_run "  - Create .env file with configuration"
 }
 
 # Main function
@@ -167,13 +309,57 @@ main() {
     check_venv
     echo
     
+    # Check required tools
+    print_info "Checking required tools..."
+    if [[ "$dry_run" == true ]]; then
+        check_required_tools "dry_run"
+    else
+        check_required_tools
+    fi
+    echo
+    
+    # Install dependencies
+    print_info "Installing dependencies..."
+    if [[ "$dry_run" == true ]]; then
+        install_dependencies "dry_run"
+    else
+        install_dependencies
+    fi
+    echo
+    
+    # Install NLTK data
+    print_info "Installing NLTK data..."
+    if [[ "$dry_run" == true ]]; then
+        install_nltk_data "dry_run"
+    else
+        install_nltk_data
+    fi
+    echo
+    
+    # Prompt for API keys
+    if [[ "$dry_run" == true ]]; then
+        prompt_for_api_keys "dry_run"
+    else
+        prompt_for_api_keys
+    fi
+    echo
+    
+    # Create .env file
+    print_info "Creating configuration file..."
+    if [[ "$dry_run" == true ]]; then
+        create_env_file "dry_run"
+    else
+        create_env_file
+    fi
+    echo
+    
     if [[ "$dry_run" == true ]]; then
         show_dry_run_plan
         echo
         print_info "Dry run completed. No changes were made to the system."
     else
-        print_info "Setup script is ready to proceed with installation."
-        print_info "Run with --dry-run to see what would be done."
+        print_success "Setup completed successfully!"
+        print_info "You can now run: python3 generate_card.py"
     fi
 }
 
