@@ -47,7 +47,9 @@ USER_INTERACTION_INPUT_VALIDATION = {
     # Word and POS prompts
     "word_prompt": "🔤 Enter the word you want to study: ",
     "pos_prompt": "📝 Part of speech [{detected_pos}] [Press Enter to confirm or change (noun/verb/adjective/adverb)]: ",
-    "about_message": "🃏 AnkiCardsToolkit v{version} by Oleg Kovalyov - Create Anki flashcard with word from your sentence\n"
+    "about_message": "🃏 AnkiCardsToolkit v{version} by Oleg Kovalyov - Create Anki flashcard with word from your sentence\n",
+    "duplicate_word_warning": "⚠️ This word is already present in your Anki collection. A new card cannot be created.\n👉 Please enter a different word, or press Enter to exit.",
+    "duplicate_word_prompt": "Enter a different word: "
 }
 
 # STEP 4: DATA GATHERING & PROCESSING
