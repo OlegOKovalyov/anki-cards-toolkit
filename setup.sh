@@ -59,6 +59,27 @@ detect_os() {
 
 # Function to check Python version
 check_python_version() {
+    if [[ "$1" == "dry_run" ]]; then
+        if command -v python3 >/dev/null 2>&1; then
+            PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
+            PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
+            PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f2)
+            
+            if [[ "$PYTHON_MAJOR" -eq 3 && "$PYTHON_MINOR" -ge 11 ]]; then
+                print_dry_run "✅ Python $PYTHON_VERSION found (meets requirement: 3.11+)"
+            else
+                print_dry_run "⚠️ Python $PYTHON_VERSION found (requires 3.11+)"
+                print_dry_run "Would terminate setup due to insufficient Python version"
+                print_dry_run "Command: exit 1"
+            fi
+        else
+            print_dry_run "❌ Python 3 not found"
+            print_dry_run "Would terminate setup due to missing Python"
+            print_dry_run "Command: exit 1"
+        fi
+        return 0
+    fi
+    
     if command -v python3 >/dev/null 2>&1; then
         PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
         PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
@@ -79,6 +100,17 @@ check_python_version() {
 
 # Function to check if virtual environment exists
 check_venv() {
+    if [[ "$1" == "dry_run" ]]; then
+        if [[ -d "$VENV_DIR" ]]; then
+            print_dry_run "✅ Virtual environment '$VENV_DIR' already exists"
+        else
+            print_dry_run "Virtual environment '$VENV_DIR' not found"
+            print_dry_run "Would create virtual environment"
+            print_dry_run "Command: python3 -m venv venv"
+        fi
+        return 0
+    fi
+    
     if [[ -d "$VENV_DIR" ]]; then
         print_success "Virtual environment '$VENV_DIR' already exists"
         return 0
@@ -90,6 +122,39 @@ check_venv() {
 
 # Function to check for required tools
 check_required_tools() {
+    if [[ "$1" == "dry_run" ]]; then
+        local missing_tools=()
+        
+        if ! command -v pip3 >/dev/null 2>&1 && ! command -v pip >/dev/null 2>&1; then
+            missing_tools+=("pip")
+        fi
+        
+        if ! command -v git >/dev/null 2>&1; then
+            missing_tools+=("git")
+        fi
+        
+        if [[ ${#missing_tools[@]} -gt 0 ]]; then
+            local tools_list=$(IFS=", " ; echo "${missing_tools[*]}")
+            print_dry_run "❌ Missing required tools: $tools_list"
+            print_dry_run "Would terminate setup and suggest installing them"
+            
+            for tool in "${missing_tools[@]}"; do
+                case "$tool" in
+                    "pip")
+                        print_dry_run "Command: sudo apt install python3-pip"
+                        ;;
+                    "git")
+                        print_dry_run "Command: sudo apt install git"
+                        ;;
+                esac
+            done
+            print_dry_run "Command: exit 1"
+        else
+            print_dry_run "✅ All required tools found (pip, git)"
+        fi
+        return 0
+    fi
+    
     local missing_tools=()
     
     if ! command -v pip3 >/dev/null 2>&1 && ! command -v pip >/dev/null 2>&1; then
@@ -102,14 +167,9 @@ check_required_tools() {
     
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         local tools_list=$(IFS=", " ; echo "${missing_tools[*]}")
-        if [[ "$1" == "dry_run" ]]; then
-            print_warning "Missing required tools: $tools_list"
-        else
-            print_error "Missing required tools: $tools_list"
-            print_error "Please install the missing tools and run the setup script again."
-            exit 1
-        fi
-        return 1
+        print_error "Missing required tools: $tools_list"
+        print_error "Please install the missing tools and run the setup script again."
+        exit 1
     else
         print_success "All required tools found (pip, git)"
         return 0
@@ -119,7 +179,8 @@ check_required_tools() {
 # Function to install dependencies
 install_dependencies() {
     if [[ "$1" == "dry_run" ]]; then
-        print_dry_run "Would install dependencies from requirements.txt"
+        print_dry_run "Would install dependencies"
+        print_dry_run "Command: pip install -r requirements.txt"
         return 0
     fi
     
@@ -137,7 +198,8 @@ install_dependencies() {
 # Function to install NLTK data
 install_nltk_data() {
     if [[ "$1" == "dry_run" ]]; then
-        print_dry_run "Would install NLTK data using scripts/install_nltk_data.py"
+        print_dry_run "Would install NLTK data"
+        print_dry_run "Command: python3 scripts/install_nltk_data.py"
         return 0
     fi
     
@@ -154,14 +216,23 @@ install_nltk_data() {
 
 # Function to prompt for API keys
 prompt_for_api_keys() {
-    local pexels_key=""
-    local thesaurus_key=""
-    
     if [[ "$1" == "dry_run" ]]; then
-        print_dry_run "Would prompt for PEXELS_API_KEY"
-        print_dry_run "Would prompt for BIG_HUGE_API_KEY"
+        print_dry_run "Would prompt user: Enter PEXELS_API_KEY:"
+        print_dry_run "Would validate that key length is 56 characters"
+        print_dry_run "❌ Invalid PEXELS_API_KEY (wrong length)"
+        print_dry_run "Would prompt again or exit with error"
+        print_dry_run "Command: exit 1"
+        echo
+        print_dry_run "Would prompt user: Enter BIG_HUGE_API_KEY:"
+        print_dry_run "Would validate that key length is 32 characters"
+        print_dry_run "❌ Invalid BIG_HUGE_API_KEY (wrong length)"
+        print_dry_run "Would prompt again or exit with error"
+        print_dry_run "Command: exit 1"
         return 0
     fi
+    
+    local pexels_key=""
+    local thesaurus_key=""
     
     echo
     print_info "API Keys Configuration"
@@ -196,7 +267,11 @@ prompt_for_api_keys() {
 # Function to create .env file
 create_env_file() {
     if [[ "$1" == "dry_run" ]]; then
-        print_dry_run "Would create .env file with API keys and configuration"
+        print_dry_run "Would create .env file from .env-sample with the following content:"
+        echo "---------------------"
+        cat .env-sample
+        echo "---------------------"
+        print_dry_run "Command: cp .env-sample .env"
         return 0
     fi
     
@@ -288,25 +363,47 @@ main() {
     
     # Check if OS is supported
     if [[ "$OS_NAME" == "Unknown" ]]; then
-        print_error "Unsupported operating system: $OSTYPE"
-        exit 1
+        if [[ "$dry_run" == true ]]; then
+            print_dry_run "❌ Unsupported OS detected: $OSTYPE"
+            print_dry_run "Would terminate script with error message"
+            print_dry_run "Command: exit 1"
+        else
+            print_error "Unsupported operating system: $OSTYPE"
+            exit 1
+        fi
     fi
     
     if [[ "$OS_NAME" == "macOS" || "$OS_NAME" == *"Ubuntu"* || "$OS_NAME" == *"Debian"* || "$OS_NAME" == *"CentOS"* || "$OS_NAME" == *"Red Hat"* || "$OS_NAME" == *"Fedora"* ]]; then
-        print_success "Supported operating system detected"
+        if [[ "$dry_run" == true ]]; then
+            print_dry_run "✅ Supported operating system detected"
+        else
+            print_success "Supported operating system detected"
+        fi
     else
-        print_warning "Operating system may not be fully supported: $OS_NAME"
+        if [[ "$dry_run" == true ]]; then
+            print_dry_run "⚠️ Operating system may not be fully supported: $OS_NAME"
+        else
+            print_warning "Operating system may not be fully supported: $OS_NAME"
+        fi
     fi
     echo
     
     # Check Python version
     print_info "Checking Python installation..."
-    check_python_version
+    if [[ "$dry_run" == true ]]; then
+        check_python_version "dry_run"
+    else
+        check_python_version
+    fi
     echo
     
     # Check virtual environment
     print_info "Checking virtual environment..."
-    check_venv
+    if [[ "$dry_run" == true ]]; then
+        check_venv "dry_run"
+    else
+        check_venv
+    fi
     echo
     
     # Check required tools
